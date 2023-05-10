@@ -49,7 +49,7 @@ resource r_storeEventsCustomTable 'Microsoft.OperationalInsights/workspaces/tabl
     retentionInDays: -1
     schema: {
       description:'Store order events custom table'
-      displayName:'DOESNT-SEEM-TO-WORK-STORE-EVENTS'
+      displayName:'DOESNT-SEEM-TO-WORK-STORE-EVENTS-0'
       name: '${logAnalyticsWorkspaceParams.storeEventsCustomTableName}${deploymentParams.global_uniqueness}_CL'
       columns: [
         {
@@ -136,7 +136,7 @@ resource r_automationEventsCustomTable 'Microsoft.OperationalInsights/workspaces
     retentionInDays: -1
     schema: {
       description:'Miztiik Automation Events'
-      displayName:'DOESNT-SEEM-TO-WORK-AUTOMATION-EVENTS'
+      displayName:'DOESNT-SEEM-TO-WORK-AUTOMATION-EVENTS-1'
       name: '${logAnalyticsWorkspaceParams.automationEventsCustomTableName}${deploymentParams.global_uniqueness}_CL'
       columns: [
         {
@@ -149,6 +149,36 @@ resource r_automationEventsCustomTable 'Microsoft.OperationalInsights/workspaces
         }
         {
           name: 'request_id'
+          type: 'string'
+        }
+      ]
+
+    }
+  }
+}
+
+resource r_managed_run_cmd_CustomTable 'Microsoft.OperationalInsights/workspaces/tables@2022-10-01' = {
+  parent:r_logAnalyticsPayGWorkspace
+  name: '${logAnalyticsWorkspaceParams.managedRunCmdCustomTableName}${deploymentParams.global_uniqueness}_CL'
+  properties: {
+    // plan: 'Basic'
+    /*
+    Apparently Basic plan does not support custom tables, ARM throws an error. Couldn't find the actual doc sayin it
+    https://learn.microsoft.com/en-us/azure/azure-monitor/logs/basic-logs-configure?tabs=portal-1
+    */
+    plan: 'Analytics'
+    retentionInDays: -1
+    schema: {
+      description:'Miztiik Run Command Automation Events'
+      displayName:'DOESNT-SEEM-TO-WORK-AUTOMATION-EVENTS-2'
+      name: '${logAnalyticsWorkspaceParams.managedRunCmdCustomTableName}${deploymentParams.global_uniqueness}_CL'
+      columns: [
+        {
+          name: 'TimeGenerated'
+          type: 'datetime'
+        }
+        {
+          name: 'RawData'
           type: 'string'
         }
       ]
@@ -193,4 +223,7 @@ output storeEventsCustomTableName string = r_storeEventsCustomTable.name
 
 output automationEventsCustomTableNamePrefix string = '${logAnalyticsWorkspaceParams.automationEventsCustomTableName}${deploymentParams.global_uniqueness}'
 output automationEventsCustomTableName string = r_automationEventsCustomTable.name
+
+output managedRunCmdCustomTableNamePrefix string = '${logAnalyticsWorkspaceParams.managedRunCmdCustomTableName}${deploymentParams.global_uniqueness}'
+output managedRunCmdCustomTableName string = r_managed_run_cmd_CustomTable.name
 

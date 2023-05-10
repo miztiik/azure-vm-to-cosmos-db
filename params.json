@@ -5,7 +5,7 @@
     "deploymentParams": {
       "value": {
         "location": "northeurope",
-        "global_uniqueness": "003",
+        "global_uniqueness": "005",
         "enterprise_name": "Miztiik_Enterprises",
         "enterprise_name_suffix": "azure_vm_to_cosmos_db",
         "sub_deploymnet_prefix": "Miztiik_Verse"
@@ -93,11 +93,12 @@
     "logAnalyticsWorkspaceParams": {
       "value": {
         "workspaceName": "lumberYard",
-        "storeEventsCustomTableName": "storeEvents",
         "retentionInDays": 32,
         "dailyQuotaGb": 2,
         "commitTier": false,
-        "automationEventsCustomTableName": "miztiikAutomationEvents"
+        "storeEventsCustomTableName": "storeEvents",
+        "automationEventsCustomTableName": "miztiikAutomationEvents",
+        "managedRunCmdCustomTableName": "miztiikRunCmdEvents"
       }
     },
     "dceParams": {

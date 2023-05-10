@@ -1,6 +1,7 @@
 param deploymentParams object
 param tags object = resourceGroup().tags
 param osKind string
+
 param storeEventsRuleName string
 param storeEventsLogFilePattern string
 param storeEventscustomTableNamePrefix string
@@ -8,6 +9,10 @@ param storeEventscustomTableNamePrefix string
 param automationEventsRuleName string
 param automationEventsLogFilePattern string
 param automationEventsCustomTableNamePrefix string
+
+param managedRunCmdRuleName string 
+param managedRunCmdLogFilePattern string
+param managedRunCmdCustomTableNamePrefix string
 
 param linDataCollectionEndpointId string
 param logAnalyticsPayGWorkspaceId string
@@ -188,6 +193,71 @@ resource r_automationEvents_dcr 'Microsoft.Insights/dataCollectionRules@2021-09-
         destinations: [ logAnalyticsPayGWorkspaceName ]
         transformKql: 'source | extend TimeGenerated=now(), RawData=tostring(RawData)'
         outputStream: 'Custom-${automationEventsCustomTableNamePrefix}_CL'
+      }
+    ]
+  }
+}
+
+// /var/log/azure/run-command/handler.log
+// https://learn.microsoft.com/en-us/azure/virtual-machines/linux/run-command
+
+// Rule for Managed Run Command Logs
+resource r_managed_run_cmd_dcr 'Microsoft.Insights/dataCollectionRules@2021-09-01-preview' = {
+  name: '${managedRunCmdRuleName}_${deploymentParams.global_uniqueness}'
+  location: deploymentParams.location
+  tags: tags
+  kind: osKind
+  properties: {
+    description: 'Log collection rule Managed Run Command executions across all linux Vms. https://learn.microsoft.com/en-us/azure/virtual-machines/linux/run-command#action-run-command-linux-troubleshooting'
+    dataCollectionEndpointId: linDataCollectionEndpointId
+    streamDeclarations: {
+      'Custom-${managedRunCmdCustomTableNamePrefix}_CL': {
+        columns: [
+          {
+            name: 'TimeGenerated'
+            type: 'datetime'
+          }
+          {
+            name: 'RawData'
+            type: 'string'
+          }
+        ]
+      }
+    }
+    dataSources: {
+      logFiles: [
+        {
+          streams: [
+            'Custom-${managedRunCmdCustomTableNamePrefix}_CL'
+          ]
+          filePatterns: [
+            managedRunCmdLogFilePattern
+          ]
+          format: 'text'
+          settings: {
+            text: {
+              recordStartTimestampFormat: 'ISO 8601'
+            }
+          }
+          // name: '${storeEventscustomTableNamePrefix}_CL'
+          name: 'myFancyLogFileFormat'
+        }
+      ]
+    }
+    destinations: {
+      logAnalytics: [
+        {
+          name: logAnalyticsPayGWorkspaceName
+          workspaceResourceId: logAnalyticsPayGWorkspaceId
+        }
+      ]
+    }
+    dataFlows: [
+      {
+        streams: [ 'Custom-${managedRunCmdCustomTableNamePrefix}_CL' ]
+        destinations: [ logAnalyticsPayGWorkspaceName ]
+        transformKql: 'source | extend TimeGenerated=now(), RawData=tostring(RawData)'
+        outputStream: 'Custom-${managedRunCmdCustomTableNamePrefix}_CL'
       }
     ]
   }

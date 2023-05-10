@@ -140,10 +140,15 @@ module r_dataCollectionRule 'modules/monitor/data_collection_rule.bicep' = {
     automationEventsRuleName: 'miztiikAutomation_Dcr'
     automationEventsLogFilePattern: '/var/log/miztiik-automation-*.log'
     automationEventsCustomTableNamePrefix: r_logAnalyticsWorkspace.outputs.automationEventsCustomTableNamePrefix
+    
+    managedRunCmdRuleName: 'miztiikManagedRunCmd_Dcr'
+    managedRunCmdLogFilePattern: '/var/log/azure/run-command-handler/*.log'
+    managedRunCmdCustomTableNamePrefix: r_logAnalyticsWorkspace.outputs.managedRunCmdCustomTableNamePrefix
 
     linDataCollectionEndpointId: r_dataCollectionEndpoint.outputs.linDataCollectionEndpointId
     logAnalyticsPayGWorkspaceName:r_logAnalyticsWorkspace.outputs.logAnalyticsPayGWorkspaceName
     logAnalyticsPayGWorkspaceId:r_logAnalyticsWorkspace.outputs.logAnalyticsPayGWorkspaceId
+
 
   }
   dependsOn: [

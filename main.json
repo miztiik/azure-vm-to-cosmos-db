@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.17.1.54307",
-      "templateHash": "5783857730689668962"
+      "templateHash": "17210147794706983436"
     }
   },
   "parameters": {
@@ -598,7 +598,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.17.1.54307",
-              "templateHash": "3468802420156763327"
+              "templateHash": "1216507002209864054"
             }
           },
           "parameters": {
@@ -656,7 +656,7 @@
                 "retentionInDays": -1,
                 "schema": {
                   "description": "Store order events custom table",
-                  "displayName": "DOESNT-SEEM-TO-WORK-STORE-EVENTS",
+                  "displayName": "DOESNT-SEEM-TO-WORK-STORE-EVENTS-0",
                   "name": "[format('{0}{1}_CL', parameters('logAnalyticsWorkspaceParams').storeEventsCustomTableName, parameters('deploymentParams').global_uniqueness)]",
                   "columns": [
                     {
@@ -741,7 +741,7 @@
                 "retentionInDays": -1,
                 "schema": {
                   "description": "Miztiik Automation Events",
-                  "displayName": "DOESNT-SEEM-TO-WORK-AUTOMATION-EVENTS",
+                  "displayName": "DOESNT-SEEM-TO-WORK-AUTOMATION-EVENTS-1",
                   "name": "[format('{0}{1}_CL', parameters('logAnalyticsWorkspaceParams').automationEventsCustomTableName, parameters('deploymentParams').global_uniqueness)]",
                   "columns": [
                     {
@@ -754,6 +754,33 @@
                     },
                     {
                       "name": "request_id",
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.OperationalInsights/workspaces', format('{0}-payGTier-{1}', parameters('logAnalyticsWorkspaceParams').workspaceName, parameters('deploymentParams').global_uniqueness))]"
+              ]
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2022-10-01",
+              "name": "[format('{0}/{1}', format('{0}-payGTier-{1}', parameters('logAnalyticsWorkspaceParams').workspaceName, parameters('deploymentParams').global_uniqueness), format('{0}{1}_CL', parameters('logAnalyticsWorkspaceParams').managedRunCmdCustomTableName, parameters('deploymentParams').global_uniqueness))]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": -1,
+                "schema": {
+                  "description": "Miztiik Run Command Automation Events",
+                  "displayName": "DOESNT-SEEM-TO-WORK-AUTOMATION-EVENTS-2",
+                  "name": "[format('{0}{1}_CL', parameters('logAnalyticsWorkspaceParams').managedRunCmdCustomTableName, parameters('deploymentParams').global_uniqueness)]",
+                  "columns": [
+                    {
+                      "name": "TimeGenerated",
+                      "type": "datetime"
+                    },
+                    {
+                      "name": "RawData",
                       "type": "string"
                     }
                   ]
@@ -792,6 +819,14 @@
             "automationEventsCustomTableName": {
               "type": "string",
               "value": "[format('{0}{1}_CL', parameters('logAnalyticsWorkspaceParams').automationEventsCustomTableName, parameters('deploymentParams').global_uniqueness)]"
+            },
+            "managedRunCmdCustomTableNamePrefix": {
+              "type": "string",
+              "value": "[format('{0}{1}', parameters('logAnalyticsWorkspaceParams').managedRunCmdCustomTableName, parameters('deploymentParams').global_uniqueness)]"
+            },
+            "managedRunCmdCustomTableName": {
+              "type": "string",
+              "value": "[format('{0}{1}_CL', parameters('logAnalyticsWorkspaceParams').managedRunCmdCustomTableName, parameters('deploymentParams').global_uniqueness)]"
             }
           }
         }
@@ -910,6 +945,15 @@
           "automationEventsCustomTableNamePrefix": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', format('{0}_{1}_La', parameters('logAnalyticsWorkspaceParams').workspaceName, parameters('deploymentParams').global_uniqueness)), '2022-09-01').outputs.automationEventsCustomTableNamePrefix.value]"
           },
+          "managedRunCmdRuleName": {
+            "value": "miztiikManagedRunCmd_Dcr"
+          },
+          "managedRunCmdLogFilePattern": {
+            "value": "/var/log/azure/run-command-handler/*.log"
+          },
+          "managedRunCmdCustomTableNamePrefix": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', format('{0}_{1}_La', parameters('logAnalyticsWorkspaceParams').workspaceName, parameters('deploymentParams').global_uniqueness)), '2022-09-01').outputs.managedRunCmdCustomTableNamePrefix.value]"
+          },
           "linDataCollectionEndpointId": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', format('{0}_{1}_Dce', parameters('dceParams').endpointNamePrefix, parameters('deploymentParams').global_uniqueness)), '2022-09-01').outputs.linDataCollectionEndpointId.value]"
           },
@@ -927,7 +971,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.17.1.54307",
-              "templateHash": "14371603381606702628"
+              "templateHash": "2467870096733939593"
             }
           },
           "parameters": {
@@ -957,6 +1001,15 @@
               "type": "string"
             },
             "automationEventsCustomTableNamePrefix": {
+              "type": "string"
+            },
+            "managedRunCmdRuleName": {
+              "type": "string"
+            },
+            "managedRunCmdLogFilePattern": {
+              "type": "string"
+            },
+            "managedRunCmdCustomTableNamePrefix": {
               "type": "string"
             },
             "linDataCollectionEndpointId": {
@@ -1152,6 +1205,71 @@
                     ],
                     "transformKql": "source | extend TimeGenerated=now(), RawData=tostring(RawData)",
                     "outputStream": "[format('Custom-{0}_CL', parameters('automationEventsCustomTableNamePrefix'))]"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "Microsoft.Insights/dataCollectionRules",
+              "apiVersion": "2021-09-01-preview",
+              "name": "[format('{0}_{1}', parameters('managedRunCmdRuleName'), parameters('deploymentParams').global_uniqueness)]",
+              "location": "[parameters('deploymentParams').location]",
+              "tags": "[parameters('tags')]",
+              "kind": "[parameters('osKind')]",
+              "properties": {
+                "description": "Log collection rule Managed Run Command executions across all linux Vms. https://learn.microsoft.com/en-us/azure/virtual-machines/linux/run-command#action-run-command-linux-troubleshooting",
+                "dataCollectionEndpointId": "[parameters('linDataCollectionEndpointId')]",
+                "streamDeclarations": {
+                  "[format('Custom-{0}_CL', parameters('managedRunCmdCustomTableNamePrefix'))]": {
+                    "columns": [
+                      {
+                        "name": "TimeGenerated",
+                        "type": "datetime"
+                      },
+                      {
+                        "name": "RawData",
+                        "type": "string"
+                      }
+                    ]
+                  }
+                },
+                "dataSources": {
+                  "logFiles": [
+                    {
+                      "streams": [
+                        "[format('Custom-{0}_CL', parameters('managedRunCmdCustomTableNamePrefix'))]"
+                      ],
+                      "filePatterns": [
+                        "[parameters('managedRunCmdLogFilePattern')]"
+                      ],
+                      "format": "text",
+                      "settings": {
+                        "text": {
+                          "recordStartTimestampFormat": "ISO 8601"
+                        }
+                      },
+                      "name": "myFancyLogFileFormat"
+                    }
+                  ]
+                },
+                "destinations": {
+                  "logAnalytics": [
+                    {
+                      "name": "[parameters('logAnalyticsPayGWorkspaceName')]",
+                      "workspaceResourceId": "[parameters('logAnalyticsPayGWorkspaceId')]"
+                    }
+                  ]
+                },
+                "dataFlows": [
+                  {
+                    "streams": [
+                      "[format('Custom-{0}_CL', parameters('managedRunCmdCustomTableNamePrefix'))]"
+                    ],
+                    "destinations": [
+                      "[parameters('logAnalyticsPayGWorkspaceName')]"
+                    ],
+                    "transformKql": "source | extend TimeGenerated=now(), RawData=tostring(RawData)",
+                    "outputStream": "[format('Custom-{0}_CL', parameters('managedRunCmdCustomTableNamePrefix'))]"
                   }
                 ]
               }
@@ -1971,6 +2089,12 @@
           "vmName": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', format('{0}_{1}_Vm', parameters('vmParams').vmNamePrefix, parameters('deploymentParams').global_uniqueness)), '2022-09-01').outputs.vmName.value]"
           },
+          "appConfigName": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', format('{0}_{1}_Config', parameters('storageAccountParams').storageAccountNamePrefix, parameters('deploymentParams').global_uniqueness)), '2022-09-01').outputs.appConfigName.value]"
+          },
+          "repoName": {
+            "value": "azure-vm-to-cosmos-db"
+          },
           "tags": {
             "value": "[parameters('tags')]"
           }
@@ -1982,7 +2106,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.17.1.54307",
-              "templateHash": "6142142023932957607"
+              "templateHash": "15394087983367462530"
             }
           },
           "parameters": {
@@ -1992,9 +2116,19 @@
             "deploymentParams": {
               "type": "object"
             },
+            "appConfigName": {
+              "type": "securestring"
+            },
+            "repoName": {
+              "type": "string"
+            },
             "tags": {
               "type": "object"
             }
+          },
+          "variables": {
+            "script_to_execute_with_vars": "REPO_NAME=\"REPO_VAR_NAME\" && \\\\\nGIT_REPO_URL=\"https://github.com/miztiik/$REPO_NAME.git\" && \\\\\ncd /var && \\\\\nrm -rf /var/$REPO_NAME && \\\\\ngit clone $GIT_REPO_URL && \\\\\ncd /var/$REPO_NAME && \\\\\nexport APP_CONFIG_NAME=\"APP_CONFIG_VAR_NAME\" && \\\\\npython3 /var/$REPO_NAME/app/az_producer_for_cosmos_db.py &\n",
+            "script_to_execute": "[replace(replace(variables('script_to_execute_with_vars'), 'APP_CONFIG_VAR_NAME', parameters('appConfigName')), 'REPO_VAR_NAME', parameters('repoName'))]"
           },
           "resources": [
             {
@@ -2006,7 +2140,7 @@
               "properties": {
                 "asyncExecution": true,
                 "source": {
-                  "script": "python3 /var/azure-vm-to-cosmos-db/app/azure_vm_to_cosmos_db.py &\r\n"
+                  "script": "[variables('script_to_execute')]"
                 }
               }
             }
@@ -2014,6 +2148,7 @@
         }
       },
       "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', format('{0}_{1}_Config', parameters('storageAccountParams').storageAccountNamePrefix, parameters('deploymentParams').global_uniqueness))]",
         "[resourceId('Microsoft.Resources/deployments', format('{0}_{1}_Vm', parameters('vmParams').vmNamePrefix, parameters('deploymentParams').global_uniqueness))]"
       ]
     }

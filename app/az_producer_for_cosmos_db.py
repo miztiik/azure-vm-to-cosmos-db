@@ -13,6 +13,17 @@ from azure.storage.queue import QueueServiceClient
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 from azure.cosmos import CosmosClient
 
+GREEN_COLOR = "\033[32m"
+RED_COLOR = "\033[31m"
+RESET_COLOR = "\033[0m"
+
+# Set up logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+# Example usage with logger
+logger.info(f'{GREEN_COLOR}This is green text{RESET_COLOR}')
+
 class GlobalArgs:
     OWNER = "Mystique"
     VERSION = "2023-05-10"
