@@ -23,10 +23,10 @@ class GlobalArgs:
 
     LOCATION = os.getenv("LOCATION", "westeurope")
     SA_NAME = os.getenv("SA_NAME", "warehousei5chd4011")
-    CONTAINER_NAME = os.getenv("CONTAINER_NAME", "store-events-015")
+    BLOB_NAME = os.getenv("BLOB_NAME", "store-events-015")
     BLOB_PREFIX = "sales_events"
 
-    APP_CONFIG_NAME=os.getenv("APP_CONFIG_NAME", "store-events-config-003")
+    APP_CONFIG_NAME=os.getenv("APP_CONFIG_NAME", "store-events-config-ibihnz-003")
 
 
 def set_logging(lv=GlobalArgs.LOG_LEVEL, log_filename="/var/log/miztiik.json"):
@@ -80,7 +80,7 @@ def _get_n_set_app_config(credential):
 def write_to_blob(container_prefix ,data, blob_svc_client):
     try:
         blob_name = f"{GlobalArgs.BLOB_PREFIX}/event_type={container_prefix}/dt={datetime.datetime.now().strftime('%Y_%m_%d')}/{datetime.datetime.now().strftime('%s%f')}.json"
-        resp = blob_svc_client.get_blob_client(container=f"{GlobalArgs.CONTAINER_NAME}", blob=blob_name).upload_blob(json.dumps(data).encode("UTF-8"))
+        resp = blob_svc_client.get_blob_client(container=f"{GlobalArgs.BLOB_NAME}", blob=blob_name).upload_blob(json.dumps(data).encode("UTF-8"))
         logger.info(f"Blob {blob_name} uploaded successfully")
     except Exception as e:
         logger.exception(f"ERROR:{str(e)}")
@@ -88,6 +88,7 @@ def write_to_blob(container_prefix ,data, blob_svc_client):
 def write_to_cosmosdb(data, db_container):
     try:
         resp = db_container.create_item(body=data)
+        resp = db_container.create_item(body={"id": data["request_id"], "sales_event":data})
         # db_container.create_item(body={'id': str(random.randrange(100000000)), 'ts': str(datetime.datetime.now())})
         logger.info(f"Document written to CosmosDB successfully")
     except Exception as e:
@@ -177,7 +178,7 @@ def lambda_handler(event, context):
             write_to_blob(_evnt_type, evnt_body, blob_svc_client)
 
             # write to cosmosdb
-            write_to_cosmosdb(json.dumps(evnt_body), db_container)
+            write_to_cosmosdb(evnt_body, db_container)
 
             t_msgs += 1
             t_sales += _s

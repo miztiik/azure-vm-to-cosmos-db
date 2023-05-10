@@ -198,6 +198,8 @@ module r_deploy_managed_run_cmd 'modules/bootstrap/run_command_on_vm.bicep'= {
   params: {
     deploymentParams:deploymentParams
     vmName: r_vm.outputs.vmName
+    appConfigName: r_appConfig.outputs.appConfigName
+    repoName: 'azure-vm-to-cosmos-db'
     tags: tags
   }
   dependsOn: [
