@@ -57,7 +57,7 @@ Azure offers user managed identity to be used with azure and non azure(aka on pr
 1. ## 🚀 Deploying the application
 
    - **Stack: Main Bicep**
-     The params required for the modules are in `params.json`. Do modify them to suit your need.(_Especially the `adminPassword.secureString` for the VM. You are strongly encouraged to Just-In-Time access<sup>[10]</sup> or use SSH key instead of password based authentication_). The helper deployment script `deploy.sh` will deploy the `main.bicep` file. This will create the following resoureces
+     The params required for the modules are in `params.json`. Do modify them to suit your need.(_Especially the `adminPassword.secureString` for the VM. You are strongly encouraged to [Just-In-Time access][10] or use SSH key instead of password based authentication_). The helper deployment script `deploy.sh` will deploy the `main.bicep` file. This will create the following resoureces
      - Resource Group(RG)
      - VNet, Subnet & Virtual Machine
      - Virtual Machine(Ubuntu)
@@ -81,10 +81,11 @@ Azure offers user managed identity to be used with azure and non azure(aka on pr
    - **Connect to the VM**
 
       The Ubuntu vm _should_ be bootstrapped using `userData` to install python3, git and also Azure Idenity initialized.
-      - Connect to the using using Just In Time Access<sup>[10]</sup>.
-            - The bootstrap code should have clone this repo to `/var/azure-vm-to-cosmos-db`, If not clone the repo.
-      - The `az_producer_for_cosmosdb.py` script expects the following environment variable. _In production, you probabaly want to store these in App configuration_
-         - `COSMOS_DB_ACCOUNT` - Name of the cosmos DB Account
+      - Connect to the using using [Just-In-Time access][10].
+         - The bootstrap code should have clone this repo to `/var/azure-vm-to-cosmos-db`, If not clone the repo.
+      - The `az_producer_for_cosmos_db.py` script expects the following environment variable. _In production, you probabaly want to store these in App configuration_
+         - `APP_CONFIG_NAME`
+         - `APP_CONFIG_NAME` - Name of the cosmos DB Account
          - `COSMOS_DB_NAME` - Name of the cosmos DB
          - `COSMOS_DB_CONTAINER_NAME` - Name of the cosmos DB Container
 
@@ -96,48 +97,47 @@ Azure offers user managed identity to be used with azure and non azure(aka on pr
       # cd /var/
       # git clone https://github.com/miztiik/azure-vm-to-cosmos-db
       # cd azure-vm-to-cosmos-db
-
-      # If pre-reqs have not been installed, run the bootstrap script manually
-      # bash /var/azure-vm-to-cosmos-db/modules/vm/bootstrap_scripts/deploy_app.sh
-      
-      export COSMOS_DB_ACCOUNT="store-backend-db-account-002"
-      export COSMOS_DB_NAME="store-backend-db-002"
-      export COSMOS_DB_CONTAINER_NAME="store-backend-container-002"
-      python3 /var/azure-vm-to-cosmos-db/app/az_producer_for_cosmosdb.py &
+     
+      export APP_CONFIG_NAME="APP_CONFIG_VAR_NAME" 
+      python3 /var/azure-vm-to-cosmos-db/app/az_producer_for_cosmos_db.py &
       ```
 
         If everything goes all right, you should see messages like below. You can also check the logs at `/var/log/miztiik-store-events-2023-04-17.json`
 
         ```bash
-        INFO:root:{
-            "request_id": "80745806-7378-439e-9707-12d485236d54",
+         INFO:root:Blob sales_events/event_type=sale_event/dt=2023_05_10/1683746549000636.json uploaded successfully
+         INFO:root:Document with id ab0655fd-28bb-4a48-9d54-481603a1aa11 written to CosmosDB successfully
+         INFO:root:{
+            "request_id": "d22f1f6a-e645-4cad-a368-7cad99d9c02f",
             "store_id": 6,
-            "store_fqdn": "m-web-srv-011.internal.cloudapp.net",
+            "store_fqdn": "m-web-srv-005.internal.cloudapp.net",
             "store_ip": "10.0.0.4",
-            "cust_id": 103,
-            "category": "Furniture",
-            "sku": 95894,
-            "price": 43.43,
-            "qty": 32,
-            "discount": 4.1,
-            "gift_wrap": false,
+            "cust_id": 918,
+            "category": "Camera",
+            "sku": 39156,
+            "price": 53.78,
+            "qty": 23,
+            "discount": 7.6,
+            "gift_wrap": true,
             "variant": "black",
             "priority_shipping": true,
-            "ts": "2023-04-17T12:56:35.868661",
-            "contact_me": "github.com/miztiik",
-            "is_return": true
-        }
-        INFO:root:Message added to store-events-q-011 successfully
+            "ts": "2023-05-10T19:22:34.028842",
+            "contact_me": "github.com/miztiik"
+         }
+         INFO:root:Blob sales_events/event_type=inventory_event/dt=2023_05_10/1683746554029194.json uploaded successfully
+         INFO:root:Document with id d22f1f6a-e645-4cad-a368-7cad99d9c02f written to CosmosDB successfully
+         INFO:root: {"resp":{"status": true, "tot_msgs": 10, "bad_msgs": 2, "sale_evnts": 7, "inventory_evnts": 3, "tot_sales": 510.67999999999995}} 
         ```
 
         Upon successful execution, You should receive `200` response code from the endpoint. If you navigate to the portal, You should see the metrics in the dashboard..
 
-      ![Miztiik Automaton: Custom Metrics To Azure Monitor](images/miztiik_automation_custom_metrics_to_azure_monitor_architecture_002.png)
+      ![Miztiik Automaton: Persist Data to Cosmos DB from Azure VM Using User Managed Identity](images/miztiik_automation_persist_data_to_cosmos_db_from_azure_vm_architecture_002.png)
+
   
      
 1. ## 📒 Conclusion
 
-    Here we have demonstrated how to push custom metrics to the REST API using User Managed Identity.
+    Here we have demonstrated persist data to cosmos db using custom idenetity.
   
 
 1. ## 🧹 CleanUp

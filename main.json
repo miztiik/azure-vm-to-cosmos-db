@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.17.1.54307",
-      "templateHash": "17210147794706983436"
+      "templateHash": "391312807929284024"
     }
   },
   "parameters": {
@@ -2106,7 +2106,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.17.1.54307",
-              "templateHash": "15394087983367462530"
+              "templateHash": "10799675959931780067"
             }
           },
           "parameters": {
@@ -2127,7 +2127,7 @@
             }
           },
           "variables": {
-            "script_to_execute_with_vars": "REPO_NAME=\"REPO_VAR_NAME\" && \\\\\nGIT_REPO_URL=\"https://github.com/miztiik/$REPO_NAME.git\" && \\\\\ncd /var && \\\\\nrm -rf /var/$REPO_NAME && \\\\\ngit clone $GIT_REPO_URL && \\\\\ncd /var/$REPO_NAME && \\\\\nexport APP_CONFIG_NAME=\"APP_CONFIG_VAR_NAME\" && \\\\\npython3 /var/$REPO_NAME/app/az_producer_for_cosmos_db.py &\n",
+            "script_to_execute_with_vars": "REPO_NAME=\"REPO_VAR_NAME\" && \\\\\nGIT_REPO_URL=\"https://github.com/miztiik/$REPO_NAME.git\" && \\\\\ncd /var && \\\\\nrm -rf /var/$REPO_NAME && \\\\\ngit clone $GIT_REPO_URL && \\\\\ncd /var/$REPO_NAME && \\\\\nchmod +x /var/$REPO_NAME/modules/vm/bootstrap_scripts/deploy_app.sh\n./var/$REPO_NAME/modules/vm/bootstrap_scripts/deploy_app.sh\nexport APP_CONFIG_NAME=\"APP_CONFIG_VAR_NAME\" && \\\\\npython3 /var/$REPO_NAME/app/az_producer_for_cosmos_db.py &\n",
             "script_to_execute": "[replace(replace(variables('script_to_execute_with_vars'), 'APP_CONFIG_VAR_NAME', parameters('appConfigName')), 'REPO_VAR_NAME', parameters('repoName'))]"
           },
           "resources": [
