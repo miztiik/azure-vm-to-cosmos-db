@@ -87,7 +87,8 @@ def write_to_blob(container_prefix ,data, blob_svc_client):
 
 def write_to_cosmosdb(data, db_container):
     try:
-        resp = db_container.create_item(body={"id": data["request_id"], "sales_event":data})
+        data["id"] = data.pop("request_id")
+        resp = db_container.create_item(body=data)
         # db_container.create_item(body={'id': str(random.randrange(100000000)), 'ts': str(datetime.datetime.now())})
         logger.info(f"Document written to CosmosDB successfully")
     except Exception as e:
