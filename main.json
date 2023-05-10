@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.17.1.54307",
-      "templateHash": "585790739864689303"
+      "templateHash": "5783857730689668962"
     }
   },
   "parameters": {
@@ -146,7 +146,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.17.1.54307",
-              "templateHash": "15130860631390287811"
+              "templateHash": "12282153549181010823"
             }
           },
           "parameters": {
@@ -160,8 +160,7 @@
               "type": "string"
             },
             "tags": {
-              "type": "object",
-              "defaultValue": "[resourceGroup().tags]"
+              "type": "object"
             }
           },
           "variables": {
@@ -192,7 +191,7 @@
             {
               "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
               "apiVersion": "2023-03-01",
-              "name": "[format('{0}/{1}', parameters('appConfigName'), 'saName')]",
+              "name": "[format('{0}/{1}', parameters('appConfigName'), 'SA_NAME')]",
               "properties": {
                 "value": "[variables('saName')]",
                 "contentType": "text/plain",
@@ -256,7 +255,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.17.1.54307",
-              "templateHash": "3264056507589027723"
+              "templateHash": "2921896887443065243"
             }
           },
           "parameters": {
@@ -296,7 +295,7 @@
             {
               "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
               "apiVersion": "2023-03-01",
-              "name": "[format('{0}/{1}', parameters('appConfigName'), 'blobName')]",
+              "name": "[format('{0}/{1}', parameters('appConfigName'), 'BLOB_NAME')]",
               "properties": {
                 "value": "[format('{0}-blob-{1}', parameters('storageAccountParams').blobNamePrefix, parameters('deploymentParams').global_uniqueness)]",
                 "contentType": "text/plain",
@@ -357,7 +356,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.17.1.54307",
-              "templateHash": "16319204590877397991"
+              "templateHash": "12995854830005814741"
             }
           },
           "parameters": {
@@ -399,7 +398,7 @@
             {
               "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
               "apiVersion": "2023-03-01",
-              "name": "[format('{0}/{1}', parameters('appConfigName'), 'queueName')]",
+              "name": "[format('{0}/{1}', parameters('appConfigName'), 'Q_NAME')]",
               "properties": {
                 "value": "[format('{0}-q-{1}', parameters('storageQueueParams').queueNamePrefix, parameters('deploymentParams').global_uniqueness)]",
                 "contentType": "text/plain",
@@ -1232,7 +1231,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.17.1.54307",
-              "templateHash": "15834270852558910331"
+              "templateHash": "1710120641279263122"
             }
           },
           "parameters": {
@@ -1719,6 +1718,10 @@
             }
           ],
           "outputs": {
+            "vmName": {
+              "type": "string",
+              "value": "[parameters('vmName')]"
+            },
             "webGenHostName": {
               "type": "string",
               "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIpName')), '2022-05-01').dnsSettings.fqdn]"
@@ -1777,6 +1780,9 @@
           "cosmosDbParams": {
             "value": "[parameters('cosmosDbParams')]"
           },
+          "appConfigName": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', format('{0}_{1}_Config', parameters('storageAccountParams').storageAccountNamePrefix, parameters('deploymentParams').global_uniqueness)), '2022-09-01').outputs.appConfigName.value]"
+          },
           "tags": {
             "value": "[parameters('tags')]"
           }
@@ -1788,7 +1794,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.17.1.54307",
-              "templateHash": "1374286974622140647"
+              "templateHash": "3172607694158112293"
             }
           },
           "parameters": {
@@ -1796,11 +1802,13 @@
               "type": "object"
             },
             "tags": {
-              "type": "object",
-              "defaultValue": "[resourceGroup().tags]"
+              "type": "object"
             },
             "cosmosDbParams": {
               "type": "object"
+            },
+            "appConfigName": {
+              "type": "string"
             }
           },
           "variables": {
@@ -1886,6 +1894,45 @@
               "dependsOn": [
                 "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', format('{0}-db-account-{1}', parameters('cosmosDbParams').cosmosDbNamePrefix, parameters('deploymentParams').global_uniqueness), variables('databaseName'))]"
               ]
+            },
+            {
+              "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
+              "apiVersion": "2023-03-01",
+              "name": "[format('{0}/{1}', parameters('appConfigName'), 'COSMOS_DB_ACCOUNT')]",
+              "properties": {
+                "value": "[format('{0}-db-account-{1}', parameters('cosmosDbParams').cosmosDbNamePrefix, parameters('deploymentParams').global_uniqueness)]",
+                "contentType": "text/plain",
+                "tags": "[parameters('tags')]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', format('{0}-db-account-{1}', parameters('cosmosDbParams').cosmosDbNamePrefix, parameters('deploymentParams').global_uniqueness))]"
+              ]
+            },
+            {
+              "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
+              "apiVersion": "2023-03-01",
+              "name": "[format('{0}/{1}', parameters('appConfigName'), 'COSMOS_DB_NAME')]",
+              "properties": {
+                "value": "[variables('databaseName')]",
+                "contentType": "text/plain",
+                "tags": "[parameters('tags')]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', format('{0}-db-account-{1}', parameters('cosmosDbParams').cosmosDbNamePrefix, parameters('deploymentParams').global_uniqueness), variables('databaseName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
+              "apiVersion": "2023-03-01",
+              "name": "[format('{0}/{1}', parameters('appConfigName'), 'COSMOS_DB_CONTAINER_NAME')]",
+              "properties": {
+                "value": "[variables('containerName')]",
+                "contentType": "text/plain",
+                "tags": "[parameters('tags')]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers', format('{0}-db-account-{1}', parameters('cosmosDbParams').cosmosDbNamePrefix, parameters('deploymentParams').global_uniqueness), variables('databaseName'), variables('containerName'))]"
+              ]
             }
           ],
           "outputs": {
@@ -1903,7 +1950,72 @@
             }
           }
         }
-      }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', format('{0}_{1}_Config', parameters('storageAccountParams').storageAccountNamePrefix, parameters('deploymentParams').global_uniqueness))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "[format('{0}_{1}_run_cmd', parameters('vmParams').vmNamePrefix, parameters('deploymentParams').global_uniqueness)]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "deploymentParams": {
+            "value": "[parameters('deploymentParams')]"
+          },
+          "vmName": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', format('{0}_{1}_Vm', parameters('vmParams').vmNamePrefix, parameters('deploymentParams').global_uniqueness)), '2022-09-01').outputs.vmName.value]"
+          },
+          "tags": {
+            "value": "[parameters('tags')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.17.1.54307",
+              "templateHash": "6142142023932957607"
+            }
+          },
+          "parameters": {
+            "vmName": {
+              "type": "string"
+            },
+            "deploymentParams": {
+              "type": "object"
+            },
+            "tags": {
+              "type": "object"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Compute/virtualMachines/runCommands",
+              "apiVersion": "2022-03-01",
+              "name": "[format('{0}/{1}', parameters('vmName'), format('{0}_{1}_script_deployment', parameters('vmName'), parameters('deploymentParams').global_uniqueness))]",
+              "location": "[parameters('deploymentParams').location]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "asyncExecution": true,
+                "source": {
+                  "script": "python3 /var/azure-vm-to-cosmos-db/app/azure_vm_to_cosmos_db.py &\r\n"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', format('{0}_{1}_Vm', parameters('vmParams').vmNamePrefix, parameters('deploymentParams').global_uniqueness))]"
+      ]
     }
   ]
 }

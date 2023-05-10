@@ -190,3 +190,17 @@ module r_cosmodb 'modules/database/cosmos.bicep' ={
     tags: tags
   }
 }
+
+
+// Deploy Script on VM
+module r_deploy_managed_run_cmd 'modules/bootstrap/run_command_on_vm.bicep'= {
+  name: '${vmParams.vmNamePrefix}_${deploymentParams.global_uniqueness}_run_cmd'
+  params: {
+    deploymentParams:deploymentParams
+    vmName: r_vm.outputs.vmName
+    tags: tags
+  }
+  dependsOn: [
+    r_vm
+  ]
+}

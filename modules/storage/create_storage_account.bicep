@@ -1,8 +1,7 @@
 param deploymentParams object
 param storageAccountParams object
 param appConfigName string
-param tags object = resourceGroup().tags
-
+param tags object
 // var = uniqStr2 = guid(resourceGroup().id, "asda")
 var uniqStr = substring(uniqueString(resourceGroup().id), 0, 6)
 var saName = '${storageAccountParams.storageAccountNamePrefix}${uniqStr}${deploymentParams.global_uniqueness}'

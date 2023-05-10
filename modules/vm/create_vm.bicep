@@ -464,6 +464,7 @@ resource windowsAgent 'Microsoft.Compute/virtualMachines/extensions@2021-11-01' 
   }
 }
 
+output vmName string = vmName
 output webGenHostName string = r_publicIp.properties.dnsSettings.fqdn
 output adminUsername string = vmParams.adminUsername
 output sshCommand string = 'ssh ${vmParams.adminUsername}@${r_publicIp.properties.dnsSettings.fqdn}'
