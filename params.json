@@ -5,7 +5,7 @@
     "deploymentParams": {
       "value": {
         "location": "northeurope",
-        "global_uniqueness": "001",
+        "global_uniqueness": "002",
         "enterprise_name": "Miztiik_Enterprises",
         "enterprise_name_suffix": "azure_vm_to_cosmos_db",
         "sub_deploymnet_prefix": "Miztiik_Verse"

@@ -1,32 +1,13 @@
-# Custom Metrics to Azure Monitor - REST API Endpoint
+# Persist Data to Cosmos DB from Azure VM Using User Managed Identity
 
-Developers at Mystique Unicorn are looking for a way to track the performance of their application using business metrics. Their application processess orders from stores from different location. They would like to know how many orders/events are in the queue at any given time. They are looking for a central way to store and visualize them. Can you show them how the can get started?
+Developers at Mystique Unicorn are using priveleged identity to persist data to Cosmos DB. They would like to use User Managed Identity to persist data to Cosmos DB. Can you help them?
+
 
 ## 🎯 Solution
 
-We can use Azure Monitor Custom metrics<sup>[1]</sup> for our solution. These can be performance metrics or business/app specific. We have multiple ways of doing so, the most common ways are
+Azure offers user managed identity to be used with azure and non azure(aka on prem) resources. In this article, we will explore how to use user managed identity to persist data to Cosmos DB from Azure VM.
 
-1. Bootstrapping the application with Azure Application Insights SDK to send custom telemetry
-1. Using Azure Monitor Agent<sup>[3]</sup>
-1. Send them directly using the Azure Monitor REST API
-
-Azure Monitor Custom Metrics allows you to authenticate<sup>[4]</sup> against the endpoint using Azure AD Service Principal or Managed Identities. This blog<sup>[2]</sup>, shows how to emit custom metrics using Service Principal. This may not be needed when your resources are already running on Azure. For ex, A VM running in Azure can leverage managed identities. We can get the `access token` to authenticate against the Azure Monitor REST API using Managed Identity<sup>[5]</sup>. To get the access token the role should have `Monitoring Metrics Publisher`<sup>[9]</sup> role assigned to it and make a `OAuth` token request to the `https://monitor.azure.com/`. We will see how to do this in the demo section.
-
-When we are planning to send custom metrics, it is important to understand the structure of the metric so that we can send the right data. The docs<sup>[6]</sup> has a good explanation of the structure. But there are few things we need to decide to send the correct data at the right frequency.
-
-- Each metric data point published contains a `namespace`, `name`, and `dimension` information. 
-    - Choose your `dimension` wisely. Avoid high cardinatlity(for ex _timestamp_) 
-- Azure Monitor stores all metrics at `1`-minute granularity intervals. 
-    - During a given minute, a metric might need to be sampled several times. - For example - CPU utilization. It is a good idea to pre-aggregate and emit the aggregated values. This can reduce ingestion costs.
-    - Another metric might need to be measured for many discrete events, such as sign-in transaction latencies
-    - An example the queue length will depending upon the time of the day, morning rush hour might have more events and needing to be sampled often. 
-- Azure Monitor doesn't support defining `Units` for a custom metric<sup>[7]</sup>.
-- Custom Mertics are stored for `93` days by default. Plan your data retention accordingly.<sup>[8]</sup>
-
-
-Now that the basics are covered, lets see this in action.
-
-![Miztiik Automaton: Send Custom Metrics Using User Managed Identity](images/miztiik_automation_custom_metrics_to_azure_monitor_architecture_001.png)
+![Miztiik Automaton: Persist Data to Cosmos DB from Azure VM Using User Managed Identity](images/miztiik_automation_persist_data_to_cosmos_db_from_azure_vm_architecture_001.png)
 
 1. ## 🧰 Prerequisites
 
@@ -41,8 +22,8 @@ Now that the basics are covered, lets see this in action.
    - Get the application code
 
      ```bash
-     https://github.com/miztiik/azure-send-custom-metrics-using-umi
-     cd azure-send-custom-metrics-using-umi
+     https://github.com/miztiik/azure-vm-to-cosmos-db
+     cd azure-vm-to-cosmos-db
      ```
 
 1. ## 🚀 Prepare the environment
@@ -82,19 +63,17 @@ Now that the basics are covered, lets see this in action.
      - Virtual Machine(Ubuntu)
         - Bootstrapped with custom libs using `userData` script.
      - User Managed Identity
-        - Monitoring Metrics Publisher role assigned to the identity
+        - Monitoring Metrics Publisher role assigned to the 
+        - Permission to read and write data to Cosmos DB
         - Identity attached to the VM
-
-        
-     **Note** - I hacked the template from another repo of mine, so you will see some unused resources. _You can safely ignore them, But do remember to clean up your Resource Group to avoid unnecessary costs._
+       
+     **Note** - I hacked the template from another repo of mine, so you will see some unused resources(log analytics workspace/queues etc.,). _You can safely ignore them, But do remember to clean up your Resource Group to avoid unnecessary costs._
 
       ```bash
       sh deploy.sh
       ```
 
      After successfully deploying the stack, Check the `Resource Groups/Deployments` section for the resources.
-
-      - **IMPORTANT** - Do not forget to update the `time` parameter in the json. This should 30minutes behind UTC or 4minutes in the future. But always from **UTC** time.
 
 
 1. ## 🔬 Testing the solution
@@ -224,7 +203,7 @@ Thank you for your interest in contributing to our project. Whether it is a bug 
 **Level**: 100
 
 [1]: https://learn.microsoft.com/en-us/azure/azure-monitor/essentials/metrics-custom-overview
-[2]: https://github.com/miztiik/azure-send-custom-metrics-using-umi
+[2]: https://github.com/miztiik/azure-vm-to-cosmos-db
 [3]: https://github.com/miztiik/send-vm-logs-to-azure-monitor
 [4]: https://learn.microsoft.com/en-us/azure/azure-monitor/essentials/metrics-custom-overview#authentication
 [5]: https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-use-vm-token#get-a-token-using-curl
