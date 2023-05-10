@@ -85,14 +85,17 @@ def _get_n_set_app_config(credential):
         GlobalArgs.BLOB_SVC_ACCOUNT_URL= f"https://{GlobalArgs.SA_NAME}.blob.core.windows.net"
         GlobalArgs.Q_SVC_ACCOUNT_URL= f"https://{GlobalArgs.SA_NAME}.queue.core.windows.net"
 
+        logger.info(f"{GREEN_COLOR}Succesfully retrieved App Configs{RESET_COLOR}")
+
     except Exception as e:
         logger.exception(f"ERROR:{str(e)}")
+        logger.exception(f"{RED_COLOR}ERROR:{str(e)}{RESET_COLOR}")
 
 def write_to_blob(container_prefix ,data, blob_svc_client):
     try:
         blob_name = f"{GlobalArgs.BLOB_PREFIX}/event_type={container_prefix}/dt={datetime.datetime.now().strftime('%Y_%m_%d')}/{datetime.datetime.now().strftime('%s%f')}.json"
         resp = blob_svc_client.get_blob_client(container=f"{GlobalArgs.BLOB_NAME}", blob=blob_name).upload_blob(json.dumps(data).encode("UTF-8"))
-        logger.info(f"Blob {blob_name} uploaded successfully")
+        logger.info(f"Blob {GREEN_COLOR}{blob_name}{RESET_COLOR} uploaded successfully")
     except Exception as e:
         logger.exception(f"ERROR:{str(e)}")
 
@@ -101,7 +104,7 @@ def write_to_cosmosdb(data, db_container):
         data["id"] = data.pop("request_id")
         resp = db_container.create_item(body=data)
         # db_container.create_item(body={'id': str(random.randrange(100000000)), 'ts': str(datetime.datetime.now())})
-        logger.info(f"Document written to CosmosDB successfully")
+        logger.info(f"Document with id {GREEN_COLOR}{data['id']}{RESET_COLOR} written to CosmosDB successfully")
     except Exception as e:
         logger.exception(f"ERROR:{str(e)}")
 
@@ -185,7 +188,7 @@ def lambda_handler(event, context):
                 inventory_evnts += 1
 
             # write to blob
-            logger.info(json.dumps(evnt_body, indent=4))
+            logger.info(f"{json.dumps(evnt_body, indent=4)}")
             write_to_blob(_evnt_type, evnt_body, blob_svc_client)
 
             # write to cosmosdb
@@ -203,7 +206,7 @@ def lambda_handler(event, context):
         resp["inventory_evnts"] = inventory_evnts
         resp["tot_sales"] = t_sales
         resp["status"] = True
-        logger.info(f'{{"resp":{json.dumps(resp)}}}')
+        logger.info(f'{GREEN_COLOR} {{"resp":{json.dumps(resp)}}} {RESET_COLOR}')
 
     except Exception as e:
         logger.error(f"ERROR:{str(e)}")

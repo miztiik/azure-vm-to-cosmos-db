@@ -18,6 +18,8 @@ cd /var && \\
 rm -rf /var/$REPO_NAME && \\
 git clone $GIT_REPO_URL && \\
 cd /var/$REPO_NAME && \\
+chmod +x /var/$REPO_NAME/modules/vm/bootstrap_scripts/deploy_app.sh
+./var/$REPO_NAME/modules/vm/bootstrap_scripts/deploy_app.sh
 export APP_CONFIG_NAME="APP_CONFIG_VAR_NAME" && \\
 python3 /var/$REPO_NAME/app/az_producer_for_cosmos_db.py &
 '''
