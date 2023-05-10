@@ -1,39 +1,53 @@
 param deploymentParams object
 param tags object
 
-resource deploymentUser 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
-  name: 'getDeploymentUser'
-  identity: {
-    type: 'UserAssigned'
-    userAssignedIdentities: {
-      '${resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', userAssignedIdentityName)}': {}
-    }
-  }
-  location: resourceGroup().location
-  kind: 'AzurePowerShell'
-  properties: {
-    azPowerShellVersion: '6.2.1'
-    arguments: ' -ResourceGroupID ${resourceGroupID} -DeploymentName ${deployment} -StartTime ${logStartMinsAgo}'
-    scriptContent: loadTextContent('../bicep/loadTextContext/setCDNServicesCertificates.ps1')
-    forceUpdateTag: now
-    cleanupPreference: 'OnSuccess'
-    retentionInterval: 'P1D'
-    timeout: 'PT${logStartMinsAgo}M'
-  }
-}
-
-
-
-
 resource r_deploy_scripts_1 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   name: 'vm-bootstrapper-${deploymentParams.global_uniqueness}'
   location: deploymentParams.location
   kind: 'AzureCLI'
+  tags: tags
   properties: {
     azCliVersion: '2.37.0'
     timeout: 'PT2H'
     retentionInterval: 'P1D'
     cleanupPreference: 'OnSuccess'
-    scriptContent: loadTextContent('../bicep/loadTextContext/setCDNServicesCertificates.ps1')
+    // forceUpdateTag: now()
+    scriptContent: loadTextContent('../vm/bootstrap_scripts/deploy_app.sh')
   }
 }
+
+
+
+// resource secrets 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
+//   name: 'secrets'
+//   location: location
+//   kind: 'AzureCLI'
+//   properties: {
+//     azCliVersion: '2.37.0'
+//     timeout: 'PT2H'
+//     retentionInterval: 'P1D'
+//     cleanupPreference: 'OnSuccess'
+//     scriptContent: '''
+//       #/bin/bash -e
+      
+//       ssh-keygen -f "key"  -N ""
+
+//       cat <<EOF >$AZ_SCRIPTS_OUTPUT_PATH
+//       {
+//         "adminSshPublicKey": "$(cat key.pub)",
+//         "adminSshPrivateKey": "$(cat key)",
+//         "adminPassword": "$(openssl rand -base64 24)",
+//         "databaseAdminPassword": "$(openssl rand -base64 24)"
+//       }
+//       EOF
+
+//     '''
+//   }
+// }
+
+// output secrets object = {
+//   adminSshPublicKey: reference('secrets').outputs.adminSshPublicKey
+//   adminSshPrivateKey: reference('secrets').outputs.adminSshPrivateKey
+//   adminPassword: reference('secrets').outputs.adminPassword
+//   databaseAdminPassword: reference('secrets').outputs.databaseAdminPassword
+// }

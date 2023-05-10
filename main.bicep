@@ -10,6 +10,8 @@ param logAnalyticsWorkspaceParams object
 param dceParams object
 param vnetParams object
 param vmParams object
+param cosmosDbParams object
+
 param brandTags object
 
 
@@ -169,6 +171,10 @@ module r_vm 'modules/vm/create_vm.bicep' = {
     storeEventsDcrId: r_dataCollectionRule.outputs.storeEventsDcrId
     automationEventsDcrId: r_dataCollectionRule.outputs.automationEventsDcrId
 
+    cosmosDbAccountName: r_cosmodb.outputs.cosmosDbAccountName
+    cosmosDbName: r_cosmodb.outputs.cosmosDbName
+    cosmosDbContainerName: r_cosmodb.outputs.cosmosDbContainerName
+
     tags: tags
   }
   dependsOn: [
@@ -176,4 +182,12 @@ module r_vm 'modules/vm/create_vm.bicep' = {
   ]
 }
 
-
+// Create Cosmos DB
+module r_cosmodb 'modules/database/cosmos.bicep' ={
+  name: '${cosmosDbParams.cosmosDbNamePrefix}_${deploymentParams.global_uniqueness}_cosmosdb'
+  params: {
+    deploymentParams:deploymentParams
+    cosmosDbParams:cosmosDbParams
+    tags: tags
+  }
+}

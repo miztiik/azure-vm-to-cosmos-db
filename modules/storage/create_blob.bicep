@@ -24,7 +24,7 @@ resource r_blobContainer 'Microsoft.Storage/storageAccounts/blobServices/contain
   }
 }
 
-modules/storage/create_blob.bicep// Store the storage account name and primary endpoint in the App Config
+// Store the storage account name and primary endpoint in the App Config
 resource r_appConfig 'Microsoft.AppConfiguration/configurationStores@2023-03-01' existing = {
   name: appConfigName
 }

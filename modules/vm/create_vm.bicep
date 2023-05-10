@@ -1,5 +1,5 @@
 param deploymentParams object
-param tags object = resourceGroup().tags
+param tags object
 
 param saName string
 param blobContainerName string
@@ -17,6 +17,10 @@ param vnetName string
 param vmName string = '${vmParams.vmNamePrefix}-${deploymentParams.global_uniqueness}'
 param dnsLabelPrefix string = toLower('${vmParams.vmNamePrefix}-${deploymentParams.global_uniqueness}-${uniqueString(resourceGroup().id, vmName)}')
 param publicIpName string = '${vmParams.vmNamePrefix}-${deploymentParams.global_uniqueness}-PublicIp'
+
+param cosmosDbAccountName string
+param cosmosDbName string
+param cosmosDbContainerName string
 
 // var userDataScript = base64(loadTextContent('./bootstrap_scripts/deploy_app.sh'))
 var userDataScript = loadFileAsBase64('./bootstrap_scripts/deploy_app.sh')
@@ -263,6 +267,51 @@ resource r_attachappConfigOwnerPermsToRole 'Microsoft.Authorization/roleAssignme
     // conditionVersion: '2.0'
     // condition: appConfigConditionStr
     principalType: 'ServicePrincipal'
+  }
+}
+
+// Get Cosmos DB Account Ref
+resource r_cosmodbAccnt 'Microsoft.DocumentDB/databaseAccounts@2022-08-15' existing = {
+  name: cosmosDbAccountName
+}
+
+// Create a custom role definition for Cosmos DB
+resource r_cosmodb_customRoleDef 'Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions@2023-04-15' = {
+  parent: r_cosmodbAccnt
+  name:  guid('r_cosmodb_customRole', r_userManagedIdentity.id, r_cosmodbAccnt.id)
+  properties: {
+    roleName: 'Miztiik Custom Role to read w Cosmos DB1'
+    type: 'CustomRole'
+    assignableScopes: [
+      r_cosmodbAccnt.id
+    ]
+    permissions: [
+      {
+        dataActions: [
+          'Microsoft.DocumentDB/databaseAccounts/readMetadata'
+          'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/*'
+          'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/*'
+          'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/executeQuery'
+          'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/readChangeFeed'
+          'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/executeStoredProcedure'
+          'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/manageConflicts'
+        ]
+      }
+    ]
+  }
+}
+
+// Assign the custom role to the user-assigned managed identity
+// var cosmosDbDataContributorRoleDefinitionId = resourceId('Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions', r_cosmodbAccnt.name, '00000000-0000-0000-0000-000000000002')
+
+
+resource r_customRoleAssignmentToUsrIdentity 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2021-04-15' = {
+  name:  guid(r_userManagedIdentity.id, r_cosmodbAccnt.id, 'r_customRoleAssignmentToUsrIdentity')
+  parent: r_cosmodbAccnt
+  properties: {
+    roleDefinitionId: r_cosmodb_customRoleDef.id
+    scope: r_cosmodbAccnt.id
+    principalId: r_userManagedIdentity.properties.principalId
   }
 }
 

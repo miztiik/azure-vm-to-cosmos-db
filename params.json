@@ -105,6 +105,13 @@
         "endpointNamePrefix": "webStore"
       }
     },
+    "cosmosDbParams": {
+      "value": {
+        "cosmosDbNamePrefix": "store-backend",
+        "cosmosDatabaseName" :"",
+        "cosmodDbContainerName":""
+      }
+    },
     "brandTags": {
       "value": {
         "owner": "Mystique",
