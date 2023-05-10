@@ -19,8 +19,6 @@ param dnsLabelPrefix string = toLower('${vmParams.vmNamePrefix}-${deploymentPara
 param publicIpName string = '${vmParams.vmNamePrefix}-${deploymentParams.global_uniqueness}-PublicIp'
 
 param cosmosDbAccountName string
-param cosmosDbName string
-param cosmosDbContainerName string
 
 // var userDataScript = base64(loadTextContent('./bootstrap_scripts/deploy_app.sh'))
 var userDataScript = loadFileAsBase64('./bootstrap_scripts/deploy_app.sh')
@@ -313,6 +311,9 @@ resource r_customRoleAssignmentToUsrIdentity 'Microsoft.DocumentDB/databaseAccou
     scope: r_cosmodbAccnt.id
     principalId: r_userManagedIdentity.properties.principalId
   }
+  dependsOn:[
+    r_userManagedIdentity
+  ]
 }
 
 

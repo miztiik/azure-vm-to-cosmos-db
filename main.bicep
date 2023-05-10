@@ -172,8 +172,6 @@ module r_vm 'modules/vm/create_vm.bicep' = {
     automationEventsDcrId: r_dataCollectionRule.outputs.automationEventsDcrId
 
     cosmosDbAccountName: r_cosmodb.outputs.cosmosDbAccountName
-    cosmosDbName: r_cosmodb.outputs.cosmosDbName
-    cosmosDbContainerName: r_cosmodb.outputs.cosmosDbContainerName
 
     tags: tags
   }
@@ -188,6 +186,7 @@ module r_cosmodb 'modules/database/cosmos.bicep' ={
   params: {
     deploymentParams:deploymentParams
     cosmosDbParams:cosmosDbParams
+    appConfigName: r_appConfig.outputs.appConfigName
     tags: tags
   }
 }

@@ -1,12 +1,10 @@
 
 param deploymentParams object
-param tags object = resourceGroup().tags
+param tags object
 
 param cosmosDbParams object
-// param cosmosAccountName string
-// param cosmosDatabaseName string
-// param cosmosCollectionName string
 
+param appConfigName string
 
 
 
@@ -87,6 +85,42 @@ resource r_cosmosDbContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases
         conflictResolutionPath: '/_ts'
       }
     }
+  }
+}
+
+
+// Store the storage account name and primary endpoint in the App Config
+resource r_appConfig 'Microsoft.AppConfiguration/configurationStores@2023-03-01' existing = {
+  name: appConfigName
+}
+
+resource r_db_accnt_Kv 'Microsoft.AppConfiguration/configurationStores/keyValues@2023-03-01' = {
+  parent: r_appConfig
+  name: 'COSMOS_DB_ACCOUNT'
+  properties: {
+    value: r_cosmosDbAccount.name
+    contentType: 'text/plain'
+    tags: tags
+  }
+}
+
+resource r_db_name_Kv 'Microsoft.AppConfiguration/configurationStores/keyValues@2023-03-01' = {
+  parent: r_appConfig
+  name: 'COSMOS_DB_NAME'
+  properties: {
+    value: r_cosmosDb.name
+    contentType: 'text/plain'
+    tags: tags
+  }
+}
+
+resource r_db_container_name_Kv 'Microsoft.AppConfiguration/configurationStores/keyValues@2023-03-01' = {
+  parent: r_appConfig
+  name: 'COSMOS_DB_CONTAINER_NAME'
+  properties: {
+    value: r_cosmosDbContainer.name
+    contentType: 'text/plain'
+    tags: tags
   }
 }
 

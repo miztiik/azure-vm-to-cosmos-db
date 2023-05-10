@@ -31,7 +31,7 @@ resource r_appConfig 'Microsoft.AppConfiguration/configurationStores@2023-03-01'
 
 resource r_q_name_Kv 'Microsoft.AppConfiguration/configurationStores/keyValues@2023-03-01' = {
   parent: r_appConfig
-  name: 'blobName'
+  name: 'BLOB_NAME'
   properties: {
     value: r_blobContainer.name
     contentType: 'text/plain'

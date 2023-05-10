@@ -82,66 +82,52 @@ Azure offers user managed identity to be used with azure and non azure(aka on pr
 
       The Ubuntu vm _should_ be bootstrapped using `userData` to install python3, git and also Azure Idenity initialized.
       - Connect to the using using Just In Time Access<sup>[10]</sup>.
-      - The following bash script does the following,
-        - Get the VM Resource ID
-        - Get the Access Token
-        - Build the Metric Payload JSON
-        - Send a metric every `10` seconds for `1000`(defined by variable `METRIC_COUNT`) times
+            - The bootstrap code should have clone this repo to `/var/azure-vm-to-cosmos-db`, If not clone the repo.
+      - The `az_producer_for_cosmosdb.py` script expects the following environment variable. _In production, you probabaly want to store these in App configuration_
+         - `COSMOS_DB_ACCOUNT` - Name of the cosmos DB Account
+         - `COSMOS_DB_NAME` - Name of the cosmos DB
+         - `COSMOS_DB_CONTAINER_NAME` - Name of the cosmos DB Container
+
+
+    - **Initiate Event Generation & Ingestion**
+
+      ```bash
+      # ssh miztiik@publicIP
+      # cd /var/
+      # git clone https://github.com/miztiik/azure-vm-to-cosmos-db
+      # cd azure-vm-to-cosmos-db
+
+      # If pre-reqs have not been installed, run the bootstrap script manually
+      # bash /var/azure-vm-to-cosmos-db/modules/vm/bootstrap_scripts/deploy_app.sh
       
+      export COSMOS_DB_ACCOUNT="store-backend-db-account-002"
+      export COSMOS_DB_NAME="store-backend-db-002"
+      export COSMOS_DB_CONTAINER_NAME="store-backend-container-002"
+      python3 /var/azure-vm-to-cosmos-db/app/az_producer_for_cosmosdb.py &
+      ```
+
+        If everything goes all right, you should see messages like below. You can also check the logs at `/var/log/miztiik-store-events-2023-04-17.json`
+
         ```bash
-        #!/bin/bash
-        # set -x
-
-        COMPUTER_NAME=$(hostname)
-        LOG_FILE="/var/log/miztiik-${COMPUTER_NAME}-$(date +'%Y-%m-%d').json"
-        
-        SLEEP_AT_WORK_SECS=0
-        METRIC_COUNT=100000
-        RES_LOCATION="westeurope"
-        VM_RES_ID=$(curl -H Metadata:true -s --noproxy "*" "http://169.254.169.254/metadata/instance/compute/resourceId?api-version=2021-05-01&format=text")
-
-        # Either remove the leading slash in the Resource ID or add a slash in the endpoint URL
-        # https://github.com/MicrosoftDocs/azure-docs/issues/107712
-        METRIC_ENDPOINT="https://${RES_LOCATION}.monitoring.azure.com${VM_RES_ID}/metrics"
-        # echo $METRIC_ENDPOINT
-
-        RESPONSE=$(curl 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https://monitor.azure.com/' -H Metadata:true -s)
-        ACCESS_TOKEN=$(echo $RESPONSE | python3 -c 'import sys, json; print (json.load(sys.stdin)["access_token"])')
-
-        # echo $ACCESS_TOKEN
-
-        for ((i=1; i<=METRIC_COUNT; i++)); do
-
-            # Set variable values
-            CURR_TIME=$(date +"%Y-%m-%dT%H:%M:%S")
-            TIME_TWO_HRS_AGO=$(date -d "-2 hours" +"%Y-%m-%dT%H:%M:%S") 
-            METRIC="PendingStoreEvents"
-            NAMESPACE="SunMunStore"
-            QUEUE_NAME="SaleEvents"
-            MESSAGE_TYPE="InventoryEvents"
-            MIN=$(shuf -i 1-30 -n 1)
-            MAX=$MIN
-            SUM=$MIN
-            # MAX=$(shuf -i 11-20 -n 1)
-            # SUM=$(shuf -i 21-30 -n 1)
-            # COUNT=$(shuf -i 1-5 -n 1)
-            COUNT=1
-
-            # Build JSON string
-            JSON_DATA="{\"time\":\"$CURR_TIME\",\"data\":{\"baseData\":{\"metric\":\"$METRIC\",\"namespace\":\"$NAMESPACE\",\"dimNames\":[\"QueueName\",\"MessageType\"],\"series\":[{\"dimValues\":[\"$QUEUE_NAME\",\"$MESSAGE_TYPE\"],\"min\":$MIN,\"max\":$MAX,\"sum\":$SUM,\"count\":$COUNT}]}}}"
-
-            # echo "$JSON_DATA"
-
-            curl --write-out %{http_code} -s\
-            -X POST ${METRIC_ENDPOINT} \
-            -H 'Content-Type: application/json' \
-            -H "Authorization: Bearer $ACCESS_TOKEN" \
-            -d "$JSON_DATA"
-
-            echo -e "\n Sent Metric: ($i/$METRIC_COUNT) -------------\n"
-
-            sleep $SLEEP_AT_WORK_SECS
-        done
+        INFO:root:{
+            "request_id": "80745806-7378-439e-9707-12d485236d54",
+            "store_id": 6,
+            "store_fqdn": "m-web-srv-011.internal.cloudapp.net",
+            "store_ip": "10.0.0.4",
+            "cust_id": 103,
+            "category": "Furniture",
+            "sku": 95894,
+            "price": 43.43,
+            "qty": 32,
+            "discount": 4.1,
+            "gift_wrap": false,
+            "variant": "black",
+            "priority_shipping": true,
+            "ts": "2023-04-17T12:56:35.868661",
+            "contact_me": "github.com/miztiik",
+            "is_return": true
+        }
+        INFO:root:Message added to store-events-q-011 successfully
         ```
 
         Upon successful execution, You should receive `200` response code from the endpoint. If you navigate to the portal, You should see the metrics in the dashboard..

@@ -8,57 +8,41 @@ import uuid
 import socket
 
 from azure.identity import DefaultAzureCredential
-from azure.cosmos import CosmosClient
+from azure.appconfiguration import AzureAppConfigurationClient
+from azure.storage.queue import QueueServiceClient
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
-
-try:
-    cosmos_client = CosmosClient(url=COSMOS_DB_URL, credential=DB_CREDENTIAL)
-    db_client = cosmos_client.get_database_client(COSMOS_DB_NAME)
-    db_container = db_client.get_container_client(COSMOS_DB_CONTAINER_NAME)
-    # db_container.create_item(body={'id': str(random.randrange(100000000)), 'ts': str(datetime.datetime.now())})
-except Exception as e:
-    logging.error('CosmosDB database or container does not exist')
-    logging.exception(f"ERROR:{str(e)}")
-
-
+from azure.cosmos import CosmosClient
 
 class GlobalArgs:
     OWNER = "Mystique"
-    VERSION = "2023-04-09"
+    VERSION = "2023-05-10"
     LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
+    EVNT_WEIGHTS = {"success": 80, "fail": 20}
+    WAIT_SECS_BETWEEN_MSGS = int(os.getenv("WAIT_SECS_BETWEEN_MSGS", 5))
+    TOT_MSGS_TO_PRODUCE = int(os.getenv("TOT_MSGS_TO_PRODUCE", 10000))
+
     LOCATION = os.getenv("LOCATION", "westeurope")
     SA_NAME = os.getenv("SA_NAME", "warehousei5chd4011")
     CONTAINER_NAME = os.getenv("CONTAINER_NAME", "store-events-015")
     BLOB_PREFIX = "sales_events"
 
-    COSMOS_DB_URL = os.getenv("COSMOS_DB_URL","https://store-backend-db-account-001.documents.azure.com:443/").rstrip('/')
-    COSMOS_DB_ACCOUNT= os.getenv("COSMOS_DB_ACCOUNT", "store-backend-db-account-001")
-    COSMOS_DB_NAME = os.getenv("COSMOS_DB_NAME", "store-backend-db-001")
-    COSMOS_DB_CONTAINER_NAME =os.getenv("COSMOS_DB_CONTAINER_NAME", "store-backend-container-001")
-
-    EVNT_WEIGHTS = {"success": 80, "fail": 20}
-    WAIT_SECS_BETWEEN_MSGS = int(os.getenv("WAIT_SECS_BETWEEN_MSGS", 2))
-    TOT_MSGS_TO_PRODUCE = int(os.getenv("TOT_MSGS_TO_PRODUCE", 10))
+    APP_CONFIG_NAME=os.getenv("APP_CONFIG_NAME", "store-events-config-003")
 
 
-
-
-def set_logging(lv=GlobalArgs.LOG_LEVEL):
+def set_logging(lv=GlobalArgs.LOG_LEVEL, log_filename="/var/log/miztiik.json"):
     logging.basicConfig(level=lv)
     logger = logging.getLogger()
     logger.setLevel(lv)
+    # Generate log filename with desired format
+    log_filename = f"/var/log/miztiik-store-events-producer-{datetime.datetime.now().strftime('%Y-%m-%d')}.json"
+    # Add a FileHandler to write logs to a file
+    fh = logging.FileHandler(log_filename)
+    fh.setLevel(lv)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    fh.setFormatter(formatter)
+    logger.addHandler(fh)
     return logger
 
-SA_ACCOUNT_URL = f"https://{GlobalArgs.SA_NAME}.blob.core.windows.net"
-COSMOS_DB_URL = f"https://{GlobalArgs.COSMOS_DB_ACCOUNT}.documents.azure.com:443"
-
-default_credential = DefaultAzureCredential()
-
-blob_svc_client = BlobServiceClient(SA_ACCOUNT_URL, credential=default_credential)
-
-cosmos_client = CosmosClient(url=COSMOS_DB_URL, credential=default_credential)
-db_client = cosmos_client.get_database_client(GlobalArgs.COSMOS_DB_NAME)
-db_container = db_client.get_container_client(GlobalArgs.COSMOS_DB_CONTAINER_NAME)
 logger = set_logging()
 
 
@@ -71,6 +55,27 @@ def _rand_coin_flip():
 
 def _gen_uuid():
     return str(uuid.uuid4())
+
+def _get_n_set_app_config(credential):
+    try:
+        GlobalArgs.APP_CONFIG_URL= f"https://{GlobalArgs.APP_CONFIG_NAME}.azconfig.io"
+
+        app_config_client = AzureAppConfigurationClient(GlobalArgs.APP_CONFIG_URL, credential=credential)
+        
+        GlobalArgs.SA_NAME = app_config_client.get_configuration_setting(key="SA_NAME").value
+        GlobalArgs.BLOB_NAME = app_config_client.get_configuration_setting(key="BLOB_NAME").value
+        GlobalArgs.Q_NAME = app_config_client.get_configuration_setting(key="Q_NAME").value
+
+        GlobalArgs.COSMOS_DB_ACCOUNT = app_config_client.get_configuration_setting(key="COSMOS_DB_ACCOUNT").value
+        GlobalArgs.COSMOS_DB_NAME = app_config_client.get_configuration_setting(key="COSMOS_DB_NAME").value
+        GlobalArgs.COSMOS_DB_CONTAINER_NAME = app_config_client.get_configuration_setting(key="COSMOS_DB_CONTAINER_NAME").value
+
+        GlobalArgs.COSMOS_DB_URL = f"https://{GlobalArgs.COSMOS_DB_ACCOUNT}.documents.azure.com"
+        GlobalArgs.BLOB_SVC_ACCOUNT_URL= f"https://{GlobalArgs.SA_NAME}.blob.core.windows.net"
+        GlobalArgs.Q_SVC_ACCOUNT_URL= f"https://{GlobalArgs.SA_NAME}.queue.core.windows.net"
+
+    except Exception as e:
+        logger.exception(f"ERROR:{str(e)}")
 
 def write_to_blob(container_prefix ,data, blob_svc_client):
     try:
@@ -91,6 +96,23 @@ def write_to_cosmosdb(data, db_container):
 def lambda_handler(event, context):
     resp = {"status": False}
     logger.debug(f"Event: {json.dumps(event)}")
+
+    # Setup Azure Clients
+    # azure_log_level = logging.getLogger('azure.core.pipeline.policies.http_logging_policy').setLevel(logging.ERROR) 
+    azure_log_level = logging.getLogger("azure").setLevel(logging.ERROR)
+    default_credential = DefaultAzureCredential(logging_enable=False,logging=azure_log_level)
+
+    # Get Config data from App Config
+    _get_n_set_app_config(default_credential)
+
+    blob_svc_client = BlobServiceClient(GlobalArgs.BLOB_SVC_ACCOUNT_URL, credential=default_credential, logging=azure_log_level)
+    q_svc_client = QueueServiceClient(GlobalArgs.Q_SVC_ACCOUNT_URL, credential=default_credential, logging=azure_log_level)
+
+
+    cosmos_client = CosmosClient(url=GlobalArgs.COSMOS_DB_URL, credential=default_credential)
+    db_client = cosmos_client.get_database_client(GlobalArgs.COSMOS_DB_NAME)
+    db_container = db_client.get_container_client(GlobalArgs.COSMOS_DB_CONTAINER_NAME)
+
     _categories = ["Books", "Games", "Mobiles", "Groceries", "Shoes", "Stationaries", "Laptops", "Tablets", "Notebooks", "Camera", "Printers", "Monitors", "Speakers", "Projectors", "Cables", "Furniture"]
     _evnt_types = ["sale_event", "inventory_event"]
     _variants = ["black", "red"]
