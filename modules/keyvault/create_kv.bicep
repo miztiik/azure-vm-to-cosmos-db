@@ -1,6 +1,6 @@
 param deploymentParams object
 param kvNamePrefix string
-param tags object = resourceGroup().tags
+param tags object
 
 param skuName string = 'standard'
 

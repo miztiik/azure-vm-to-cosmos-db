@@ -1,6 +1,6 @@
 param deploymentParams object
 param logAnalyticsWorkspaceParams object
-param tags object = resourceGroup().tags
+param tags object
 
 // Create the LogAnalytics Workspace Pay-As-You-Go Tier
 resource r_logAnalyticsPayGWorkspace 'Microsoft.OperationalInsights/workspaces@2020-08-01' = if (logAnalyticsWorkspaceParams.commitTier == false) {

@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.17.1.54307",
-      "templateHash": "391312807929284024"
+      "templateHash": "11920111276827063395"
     }
   },
   "parameters": {
@@ -146,7 +146,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.17.1.54307",
-              "templateHash": "12282153549181010823"
+              "templateHash": "18333835515672304570"
             }
           },
           "parameters": {
@@ -182,6 +182,7 @@
                 "minimumTlsVersion": "[format('{0}', parameters('storageAccountParams').minimumTlsVersion)]",
                 "allowBlobPublicAccess": "[parameters('storageAccountParams').allowBlobPublicAccess]",
                 "supportsHttpsTrafficOnly": true,
+                "accessTier": "Hot",
                 "networkAcls": {
                   "bypass": "AzureServices",
                   "defaultAction": "Allow"
@@ -1326,6 +1327,9 @@
           "vnetName": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', format('{0}_{1}_Vnet', parameters('vnetParams').vnetNamePrefix, parameters('deploymentParams').global_uniqueness)), '2022-09-01').outputs.vnetName.value]"
           },
+          "logAnalyticsPayGWorkspaceId": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', format('{0}_{1}_La', parameters('logAnalyticsWorkspaceParams').workspaceName, parameters('deploymentParams').global_uniqueness)), '2022-09-01').outputs.logAnalyticsPayGWorkspaceId.value]"
+          },
           "linDataCollectionEndpointId": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', format('{0}_{1}_Dce', parameters('dceParams').endpointNamePrefix, parameters('deploymentParams').global_uniqueness)), '2022-09-01').outputs.linDataCollectionEndpointId.value]"
           },
@@ -1349,7 +1353,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.17.1.54307",
-              "templateHash": "1710120641279263122"
+              "templateHash": "18125240709841068330"
             }
           },
           "parameters": {
@@ -1372,6 +1376,9 @@
               "type": "string"
             },
             "appConfigName": {
+              "type": "string"
+            },
+            "logAnalyticsPayGWorkspaceId": {
               "type": "string"
             },
             "linDataCollectionEndpointId": {
@@ -1544,6 +1551,36 @@
                   }
                 ]
               }
+            },
+            {
+              "type": "Microsoft.Insights/diagnosticSettings",
+              "apiVersion": "2021-05-01-preview",
+              "scope": "[format('Microsoft.Network/networkSecurityGroups/{0}', 'webSg')]",
+              "name": "default",
+              "properties": {
+                "workspaceId": "[parameters('logAnalyticsPayGWorkspaceId')]",
+                "logs": [
+                  {
+                    "category": "NetworkSecurityGroupEvent",
+                    "enabled": true,
+                    "retentionPolicy": {
+                      "enabled": false,
+                      "days": 0
+                    }
+                  },
+                  {
+                    "category": "NetworkSecurityGroupRuleCounter",
+                    "enabled": true,
+                    "retentionPolicy": {
+                      "enabled": false,
+                      "days": 0
+                    }
+                  }
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', 'webSg')]"
+              ]
             },
             {
               "type": "Microsoft.Network/networkInterfaces",
@@ -1877,6 +1914,7 @@
         "[resourceId('Microsoft.Resources/deployments', format('{0}_{1}_cosmosdb', parameters('cosmosDbParams').cosmosDbNamePrefix, parameters('deploymentParams').global_uniqueness))]",
         "[resourceId('Microsoft.Resources/deployments', format('{0}_{1}_Dce', parameters('dceParams').endpointNamePrefix, parameters('deploymentParams').global_uniqueness))]",
         "[resourceId('Microsoft.Resources/deployments', format('{0}_{1}_Dcr', parameters('logAnalyticsWorkspaceParams').workspaceName, parameters('deploymentParams').global_uniqueness))]",
+        "[resourceId('Microsoft.Resources/deployments', format('{0}_{1}_La', parameters('logAnalyticsWorkspaceParams').workspaceName, parameters('deploymentParams').global_uniqueness))]",
         "[resourceId('Microsoft.Resources/deployments', format('{0}_{1}_Sa', parameters('storageAccountParams').storageAccountNamePrefix, parameters('deploymentParams').global_uniqueness))]",
         "[resourceId('Microsoft.Resources/deployments', format('{0}_{1}_Sq', parameters('storageAccountParams').storageAccountNamePrefix, parameters('deploymentParams').global_uniqueness))]",
         "[resourceId('Microsoft.Resources/deployments', format('{0}_{1}_Vnet', parameters('vnetParams').vnetNamePrefix, parameters('deploymentParams').global_uniqueness))]"

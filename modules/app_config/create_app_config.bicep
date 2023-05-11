@@ -1,6 +1,6 @@
 param deploymentParams object
 param appConfigParams object
-param tags object = resourceGroup().tags
+param tags object
 
 param addRandom string = toLower(substring(uniqueString(resourceGroup().id), 0, 6))
 

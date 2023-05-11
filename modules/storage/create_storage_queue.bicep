@@ -2,7 +2,7 @@ param deploymentParams object
 param storageQueueParams object
 param storageAccountName string
 param appConfigName string
-param tags object = resourceGroup().tags
+param tags object
 
 // Get reference of SA
 resource r_sa 'Microsoft.Storage/storageAccounts@2021-06-01' existing = {

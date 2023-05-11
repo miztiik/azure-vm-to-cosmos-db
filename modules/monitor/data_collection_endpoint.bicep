@@ -1,6 +1,6 @@
 param deploymentParams object
 param dceParams object
-param tags object = resourceGroup().tags
+param tags object
 param osKind string
 
 

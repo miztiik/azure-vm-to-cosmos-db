@@ -1,5 +1,5 @@
 param deploymentParams object
-param tags object = resourceGroup().tags
+param tags object
 param osKind string
 
 param storeEventsRuleName string
