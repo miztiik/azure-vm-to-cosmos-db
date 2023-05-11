@@ -43,7 +43,6 @@ resource r_deploy_script_on_vm 'Microsoft.Compute/virtualMachines/runCommands@20
 /*
 script_location = '/var/lib/waagent/run-command-handler/download/VM_NAME_script_deployment/0/script.sh'
 output_location = '/var/lib/waagent/run-command-handler/download/m-web-srv-004_004_script_deployment/0'
-
 */
 
 

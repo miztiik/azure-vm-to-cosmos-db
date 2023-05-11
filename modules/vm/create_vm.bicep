@@ -8,6 +8,8 @@ param saPrimaryEndpointsBlob string
 param queueName string
 param appConfigName string
 
+param logAnalyticsPayGWorkspaceId string
+
 param linDataCollectionEndpointId string
 param storeEventsDcrId string
 param automationEventsDcrId string
@@ -141,6 +143,33 @@ resource r_webSg 'Microsoft.Network/networkSecurityGroups@2021-05-01' = {
           access: 'Allow'
           priority: 180
           direction: 'Outbound'
+        }
+      }
+    ]
+  }
+}
+
+//
+resource r_webSgNsgDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  scope: r_webSg
+  name: 'default'
+  properties: {
+    workspaceId: logAnalyticsPayGWorkspaceId
+    logs: [
+      {
+        category: 'NetworkSecurityGroupEvent'
+        enabled: true
+        retentionPolicy: {
+          enabled: false
+          days: 0
+        }
+      }
+      {
+        category: 'NetworkSecurityGroupRuleCounter'
+        enabled: true
+        retentionPolicy: {
+          enabled: false
+          days: 0
         }
       }
     ]

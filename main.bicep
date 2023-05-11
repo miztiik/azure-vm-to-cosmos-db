@@ -149,7 +149,6 @@ module r_dataCollectionRule 'modules/monitor/data_collection_rule.bicep' = {
     logAnalyticsPayGWorkspaceName:r_logAnalyticsWorkspace.outputs.logAnalyticsPayGWorkspaceName
     logAnalyticsPayGWorkspaceId:r_logAnalyticsWorkspace.outputs.logAnalyticsPayGWorkspaceId
 
-
   }
   dependsOn: [
     r_logAnalyticsWorkspace
@@ -171,6 +170,8 @@ module r_vm 'modules/vm/create_vm.bicep' = {
 
     vmParams: vmParams
     vnetName: r_vnet.outputs.vnetName
+
+    logAnalyticsPayGWorkspaceId:r_logAnalyticsWorkspace.outputs.logAnalyticsPayGWorkspaceId
 
     linDataCollectionEndpointId: r_dataCollectionEndpoint.outputs.linDataCollectionEndpointId
     storeEventsDcrId: r_dataCollectionRule.outputs.storeEventsDcrId

@@ -18,6 +18,7 @@ resource r_sa 'Microsoft.Storage/storageAccounts@2022-05-01' = {
     minimumTlsVersion: '${storageAccountParams.minimumTlsVersion}'
     allowBlobPublicAccess: storageAccountParams.allowBlobPublicAccess
     supportsHttpsTrafficOnly: true
+    accessTier: 'Hot'
     networkAcls: {
       bypass: 'AzureServices'
       defaultAction: 'Allow'
