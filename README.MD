@@ -62,6 +62,10 @@ Azure offers user managed identity to be used with azure and non azure(aka on pr
      - VNet, Subnet & Virtual Machine
      - Virtual Machine(Ubuntu)
         - Bootstrapped with custom libs using `userData` script.
+      - Appl Configuration
+        - `COSMOS_DB_ACCOUN_NAME` - Name of the cosmos DB Account
+        - `COSMOS_DB_NAME` - Name of the cosmos DB
+        - `COSMOS_DB_CONTAINER_NAME` - Name of the cosmos DB Containe
      - User Managed Identity
         - Monitoring Metrics Publisher role assigned to the 
         - Permission to read and write data to Cosmos DB
@@ -85,10 +89,6 @@ Azure offers user managed identity to be used with azure and non azure(aka on pr
          - The bootstrap code should have clone this repo to `/var/azure-vm-to-cosmos-db`, If not clone the repo.
       - The `az_producer_for_cosmos_db.py` script expects the following environment variable. _In production, you probabaly want to store these in App configuration_
          - `APP_CONFIG_NAME`
-         - `APP_CONFIG_NAME` - Name of the cosmos DB Account
-         - `COSMOS_DB_NAME` - Name of the cosmos DB
-         - `COSMOS_DB_CONTAINER_NAME` - Name of the cosmos DB Container
-
 
     - **Initiate Event Generation & Ingestion**
 
@@ -170,16 +170,7 @@ Thank you for your interest in contributing to our project. Whether it is a bug 
 ### 📚 References
 
 
-1. [Azure Docs: Azure Custom Metrics][1]
-1. [Miztiik Blog: Custom Metrics to Azure Monitor - REST API Endpoint][2]
-1. [Miztiik Blog: Send custom metrics from Vm to Azure Monitor using AMA][3]
-1. [Azure Docs: Register App to get Auth Tokens from AAD][3]
-1. [Azure Docs: Custom Metrics AuthN - Managed Identity & Service Principal][4]
-1. [Azure Docs: Get Access Token From VM using Managed Identity][5]
-1. [Azure Docs: Sample Custom Metric][6]
-1. [Azure Docs: Custom Metric Definition][7]
-1. [Azure Docs: Platform and custom metrics Retention][8]
-1. [Azure Docs: BuiltIn Roles - Monitoring Metrics Publisher][8]
+
 1. [Azure Docs: Just In Time Access][10]
 
 ### 🏷️ Metadata
@@ -187,17 +178,6 @@ Thank you for your interest in contributing to our project. Whether it is a bug 
 ![miztiik-success-green](https://img.shields.io/badge/Miztiik:Automation:Level-100-green)
 
 **Level**: 100
-
-[1]: https://learn.microsoft.com/en-us/azure/azure-monitor/essentials/metrics-custom-overview
-[2]: https://github.com/miztiik/azure-vm-to-cosmos-db
-[3]: https://github.com/miztiik/send-vm-logs-to-azure-monitor
-[4]: https://learn.microsoft.com/en-us/azure/azure-monitor/essentials/metrics-custom-overview#authentication
-[5]: https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-use-vm-token#get-a-token-using-curl
-[6]: https://learn.microsoft.com/en-us/azure/azure-monitor/essentials/metrics-custom-overview#sample-custom-metric-publication
-[7]: https://learn.microsoft.com/en-us/azure/azure-monitor/essentials/metrics-custom-overview#how-to-send-custom-metrics
-[8]: https://learn.microsoft.com/en-us/azure/azure-monitor/essentials/data-platform-metrics#platform-and-custom-metrics
-[9]: https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#monitoring-metrics-publisher
-
 
 [10]: https://learn.microsoft.com/en-us/azure/defender-for-cloud/just-in-time-access-usage
 
