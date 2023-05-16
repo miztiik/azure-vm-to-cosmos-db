@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.17.1.54307",
-      "templateHash": "9338349409026685394"
+      "templateHash": "3568274365197346754"
     }
   },
   "parameters": {
@@ -2298,7 +2298,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.17.1.54307",
-              "templateHash": "14120979747433789712"
+              "templateHash": "8081075157279176829"
             }
           },
           "parameters": {
@@ -2351,6 +2351,7 @@
               "tags": "[parameters('tags')]",
               "properties": {
                 "asyncExecution": true,
+                "runAsUser": "root",
                 "parameters": [
                   {
                     "name": "EVENTS_TO_PRODUCE",
@@ -2359,7 +2360,8 @@
                 ],
                 "source": {
                   "script": "[variables('script_to_execute')]"
-                }
+                },
+                "timeoutInSeconds": 600
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines/runCommands', parameters('vmName'), format('{0}_{1}_script_1', parameters('deploymentParams').enterprise_name_suffix, parameters('deploymentParams').global_uniqueness))]"

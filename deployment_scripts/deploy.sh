@@ -33,7 +33,7 @@ DEPLOYMENT_OUTPUT_1=""
 function deploy_everything()
 {
 
-echo -e " Creating Resource Group: ${CYAN}${RG_NAME}${RESET} in ${CYAN}${LOCATION}${RESET}"
+echo -e " Creating Resource Group: ${CYAN}${RG_NAME}${RESET} at ${CYAN}${LOCATION}${RESET}"
 RG_CREATION_OUTPUT=$(az group create -n $RG_NAME --location $LOCATION  | jq -r '.name')
 
 if [ $? == 0 ]; then
@@ -49,16 +49,7 @@ az bicep build --file $1
 
 # Initiate Deployments
 echo -e "${YELLOW} Initiating Deployments ${RESET}" # Yellow
-echo -e "  Deploy: ${CYAN}${DEPLOYMENT_NAME} ${RESET} at ${CYAN}${LOCATION}${RESET}"
-
-# DEPLOYMENT_OUTPUT_1=$(az deployment sub create \
-#                     --name ${SUB_DEPLOYMENT_PREFIX}"-"${GLOBAL_UNIQUENESS}"-Deployment" \
-#                     --location ${LOCATION} \
-#                     --parameters @params.json \
-#                     --template-file $1 \
-#                     # --confirm-with-what-if
-#                     )
-
+echo -e "  Deploy: ${CYAN}${DEPLOYMENT_NAME}${RESET} at ${CYAN}${LOCATION}${RESET}"
 
 az deployment group create \
     --name ${DEPLOYMENT_NAME} \

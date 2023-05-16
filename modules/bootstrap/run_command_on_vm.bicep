@@ -11,13 +11,13 @@ resource r_vm_1 'Microsoft.Compute/virtualMachines@2022-03-01' existing = {
 }
 
 var command_to_clone_repo_with_vars = '''
-REPO_NAME="REPO_NAME_VAR" && \
-GIT_REPO_URL="https://github.com/miztiik/$REPO_NAME.git" && \
+REPO_NAME="REPO_NAME_VAR" &&\\
+GIT_REPO_URL="https://github.com/miztiik/$REPO_NAME.git" &&\\
 cd /var && \
-rm -rf /var/$REPO_NAME && \
-git clone $GIT_REPO_URL && \
-cd /var/$REPO_NAME && \
-chmod +x /var/$REPO_NAME/modules/vm/bootstrap_scripts/deploy_app.sh && \
+rm -rf /var/$REPO_NAME &&\\
+git clone $GIT_REPO_URL &&\\
+cd /var/$REPO_NAME &&\\
+chmod +x /var/$REPO_NAME/modules/vm/bootstrap_scripts/deploy_app.sh &&\\
 bash /var/$REPO_NAME/modules/vm/bootstrap_scripts/deploy_app.sh &
 '''
 

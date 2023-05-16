@@ -212,7 +212,7 @@ module r_cosmodb 'modules/database/cosmos.bicep' ={
 
 // Add Delay for Cosmos DB to be ready
 module r_add_delay 'modules/bootstrap/add_delay.bicep'={
-  name: '${deploymentParams.global_uniqueness}_add_delay'
+  name: 'deployment_delay_${deploymentParams.global_uniqueness}'
   params: {
     deploymentParams:deploymentParams
     r_usr_mgd_identity_id: r_usr_mgd_identity.outputs.usr_mgd_identity_id
