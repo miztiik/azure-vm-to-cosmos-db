@@ -33,7 +33,7 @@ DEPLOYMENT_OUTPUT_1=""
 function deploy_everything()
 {
 
-echo -e " Creating Resource Group: ${CYAN}${RG_NAME}${RESET} creation in ${CYAN}${LOCATION}${RESET}"
+echo -e " Creating Resource Group: ${CYAN}${RG_NAME}${RESET} in ${CYAN}${LOCATION}${RESET}"
 RG_CREATION_OUTPUT=$(az group create -n $RG_NAME --location $LOCATION  | jq -r '.name')
 
 if [ $? == 0 ]; then

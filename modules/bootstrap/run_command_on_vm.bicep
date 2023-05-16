@@ -53,6 +53,7 @@ resource r_deploy_script_2 'Microsoft.Compute/virtualMachines/runCommands@2022-0
   tags: tags
   properties: {
     asyncExecution: true
+    runAsUser: 'root'
     parameters: [
       {
         name: 'EVENTS_TO_PRODUCE'
@@ -62,6 +63,7 @@ resource r_deploy_script_2 'Microsoft.Compute/virtualMachines/runCommands@2022-0
     source: {
         script: script_to_execute
       }
+      timeoutInSeconds: 600
   }
   dependsOn: [
     r_deploy_script_1

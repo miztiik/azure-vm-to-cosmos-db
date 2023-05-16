@@ -499,6 +499,19 @@ resource windowsAgent 'Microsoft.Compute/virtualMachines/extensions@2021-11-01' 
   }
 }
 
+/*
+
+resource runSetupCommands 'Microsoft.Compute/virtualMachines/runCommands@2022-03-01' = {
+  name: '${i}-${vmName}/ssh'
+  location: location
+  properties: {
+    source: {
+        script: 'sed -i \'s/#Port 22/Port 45/g\' /etc/ssh/sshd_config && systemctl restart sshd'
+      }
+  }
+}
+*/
+
 output vmName string = vmName
 output webGenHostName string = r_publicIp.properties.dnsSettings.fqdn
 output adminUsername string = vmParams.adminUsername
