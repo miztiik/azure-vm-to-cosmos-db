@@ -3,6 +3,7 @@ targetScope = 'resourceGroup'
 
 // Parameters
 param deploymentParams object
+param identityParams object
 param appConfigParams object
 param storageAccountParams object
 param storageQueueParams object
@@ -29,6 +30,16 @@ param tags object = union(brandTags, {last_deployed:dateNow})
 //   }
 // }
 
+// Create Identity
+module r_usr_mgd_identity 'modules/identity/create_usr_mgd_identity.bicep' = {
+  name: '${deploymentParams.enterprise_name_suffix}_${deploymentParams.global_uniqueness}_usr_mgd_identity'
+  params: {
+    deploymentParams:deploymentParams
+    identityParams:identityParams
+    tags: tags
+  }
+}
+
 // // Create Key Vault
 // module r_kv 'modules/keyvault/create_kv.bicep' = {
 // //   name: '${storageAccountParams.storageAccountNamePrefix}_${deploymentParams.global_uniqueness}_Kv'
@@ -38,6 +49,7 @@ param tags object = union(brandTags, {last_deployed:dateNow})
 //     tags: tags
 //   }
 // }
+
 
 //Create App Config
 module r_appConfig 'modules/app_config/create_app_config.bicep' = {
@@ -160,6 +172,7 @@ module r_vm 'modules/vm/create_vm.bicep' = {
   name: '${vmParams.vmNamePrefix}_${deploymentParams.global_uniqueness}_Vm'
   params: {
     deploymentParams:deploymentParams
+    r_usr_mgd_identity_name: r_usr_mgd_identity.outputs.usr_mgd_identity_name
 
     saName: r_sa.outputs.saName
     blobContainerName: r_blob.outputs.blobContainerName
@@ -177,7 +190,7 @@ module r_vm 'modules/vm/create_vm.bicep' = {
     storeEventsDcrId: r_dataCollectionRule.outputs.storeEventsDcrId
     automationEventsDcrId: r_dataCollectionRule.outputs.automationEventsDcrId
 
-    cosmosDbAccountName: r_cosmodb.outputs.cosmosDbAccountName
+    cosmos_db_accnt_name: r_cosmodb.outputs.cosmos_db_accnt_name
 
     tags: tags
   }
@@ -188,7 +201,7 @@ module r_vm 'modules/vm/create_vm.bicep' = {
 
 // Create Cosmos DB
 module r_cosmodb 'modules/database/cosmos.bicep' ={
-  name: '${cosmosDbParams.cosmosDbNamePrefix}_${deploymentParams.global_uniqueness}_cosmosdb'
+  name: '${cosmosDbParams.cosmosDbNamePrefix}_${deploymentParams.global_uniqueness}_cosmos_db'
   params: {
     deploymentParams:deploymentParams
     cosmosDbParams:cosmosDbParams
@@ -197,6 +210,20 @@ module r_cosmodb 'modules/database/cosmos.bicep' ={
   }
 }
 
+// Add Delay for Cosmos DB to be ready
+module r_add_delay 'modules/bootstrap/add_delay.bicep'={
+  name: '${deploymentParams.global_uniqueness}_add_delay'
+  params: {
+    deploymentParams:deploymentParams
+    r_usr_mgd_identity_id: r_usr_mgd_identity.outputs.usr_mgd_identity_id
+    delayInSeconds: 60
+    delay_multiple: 1
+    tags: tags
+  }
+  dependsOn: [
+    r_cosmodb
+  ]
+}
 
 // Deploy Script on VM
 module r_deploy_managed_run_cmd 'modules/bootstrap/run_command_on_vm.bicep'= {
@@ -206,6 +233,7 @@ module r_deploy_managed_run_cmd 'modules/bootstrap/run_command_on_vm.bicep'= {
     vmName: r_vm.outputs.vmName
     appConfigName: r_appConfig.outputs.appConfigName
     repoName: brandTags.project
+    deploy_app_script: true
     tags: tags
   }
   dependsOn: [

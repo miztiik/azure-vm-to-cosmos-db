@@ -1,6 +1,7 @@
 param deploymentParams object
 param tags object
 
+param r_usr_mgd_identity_name string
 param saName string
 param blobContainerName string
 param saPrimaryEndpointsBlob string
@@ -20,7 +21,7 @@ param vmName string = '${vmParams.vmNamePrefix}-${deploymentParams.global_unique
 param dnsLabelPrefix string = toLower('${vmParams.vmNamePrefix}-${deploymentParams.global_uniqueness}-${uniqueString(resourceGroup().id, vmName)}')
 param publicIpName string = '${vmParams.vmNamePrefix}-${deploymentParams.global_uniqueness}-PublicIp'
 
-param cosmosDbAccountName string
+param cosmos_db_accnt_name string
 
 // var userDataScript = base64(loadTextContent('./bootstrap_scripts/deploy_app.sh'))
 var userDataScript = loadFileAsBase64('./bootstrap_scripts/deploy_app.sh')
@@ -43,6 +44,24 @@ var LinuxConfiguration = {
     ]
   }
 }
+
+
+
+// Resource References
+resource r_blob_Ref 'Microsoft.Storage/storageAccounts/blobServices/containers@2021-04-01' existing = {
+  name: '${saName}/default/${blobContainerName}'
+}
+
+// Reference existing User-Assigned Identity
+resource r_userManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
+  name: r_usr_mgd_identity_name
+}
+
+// Get Cosmos DB Account Ref
+resource r_cosmos_db_accnt 'Microsoft.DocumentDB/databaseAccounts@2022-08-15' existing = {
+  name: cosmos_db_accnt_name
+}
+
 
 resource r_publicIp 'Microsoft.Network/publicIPAddresses@2022-05-01' = {
   name: publicIpName
@@ -202,12 +221,7 @@ resource r_nic_01 'Microsoft.Network/networkInterfaces@2022-05-01' = {
   }
 }
 
-// Create User-Assigned Identity
-resource r_userManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
-  name: '${vmName}_${deploymentParams.global_uniqueness}_Identity'
-  location: deploymentParams.location
-  tags: tags
-}
+
 
 
 // Add permissions to the custom identity to write to the blob storage
@@ -216,9 +230,6 @@ param blobOwnerRoleId string = 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b'
 
 var blobPermsConditionStr= '((!(ActionMatches{\'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/read\'}) AND !(ActionMatches{\'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write\'}) ) OR (@Resource[Microsoft.Storage/storageAccounts/blobServices/containers:name] StringEquals \'${blobContainerName}\'))'
 
-resource r_blob_Ref 'Microsoft.Storage/storageAccounts/blobServices/containers@2021-04-01' existing = {
-  name: '${saName}/default/${blobContainerName}'
-}
 
 
 // Refined Scope with conditions
@@ -297,20 +308,15 @@ resource r_attachappConfigOwnerPermsToRole 'Microsoft.Authorization/roleAssignme
   }
 }
 
-// Get Cosmos DB Account Ref
-resource r_cosmodbAccnt 'Microsoft.DocumentDB/databaseAccounts@2022-08-15' existing = {
-  name: cosmosDbAccountName
-}
-
 // Create a custom role definition for Cosmos DB
 resource r_cosmodb_customRoleDef 'Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions@2023-04-15' = {
-  parent: r_cosmodbAccnt
-  name:  guid('r_cosmodb_customRole', r_userManagedIdentity.id, r_cosmodbAccnt.id)
+  parent: r_cosmos_db_accnt
+  name:  guid('r_cosmodb_customRole', r_userManagedIdentity.id, r_cosmos_db_accnt.id)
   properties: {
     roleName: 'Miztiik Custom Role to read w Cosmos DB1'
     type: 'CustomRole'
     assignableScopes: [
-      r_cosmodbAccnt.id
+      r_cosmos_db_accnt.id
     ]
     permissions: [
       {
@@ -329,15 +335,15 @@ resource r_cosmodb_customRoleDef 'Microsoft.DocumentDB/databaseAccounts/sqlRoleD
 }
 
 // Assign the custom role to the user-assigned managed identity
-// var cosmosDbDataContributorRoleDefinitionId = resourceId('Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions', r_cosmodbAccnt.name, '00000000-0000-0000-0000-000000000002')
+// var cosmosDbDataContributorRoleDefinitionId = resourceId('Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions', r_cosmos_db_accnt.name, '00000000-0000-0000-0000-000000000002')
 
 
 resource r_customRoleAssignmentToUsrIdentity 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2021-04-15' = {
-  name:  guid(r_userManagedIdentity.id, r_cosmodbAccnt.id, 'r_customRoleAssignmentToUsrIdentity')
-  parent: r_cosmodbAccnt
+  name:  guid(r_userManagedIdentity.id, r_cosmos_db_accnt.id, 'r_customRoleAssignmentToUsrIdentity')
+  parent: r_cosmos_db_accnt
   properties: {
     roleDefinitionId: r_cosmodb_customRoleDef.id
-    scope: r_cosmodbAccnt.id
+    scope: r_cosmos_db_accnt.id
     principalId: r_userManagedIdentity.properties.principalId
   }
   dependsOn:[

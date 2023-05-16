@@ -1,38 +1,35 @@
 
 param vmName string
 param deploymentParams object
-@secure()
 param appConfigName string
 param repoName string
 param tags object
-
+param deploy_app_script bool = false
 
 resource r_vm_1 'Microsoft.Compute/virtualMachines@2022-03-01' existing = {
   name: vmName
 }
 
-var command_to_clone_repo = '''
-REPO_NAME="REPO_VAR_NAME" && \\
-GIT_REPO_URL="https://github.com/miztiik/$REPO_NAME.git" && \\
-cd /var && \\
-rm -rf /var/$REPO_NAME && \\
-git clone $GIT_REPO_URL && \\
-cd /var/$REPO_NAME && \\
-chmod +x /var/$REPO_NAME/modules/vm/bootstrap_scripts/deploy_app.sh
-./var/$REPO_NAME/modules/vm/bootstrap_scripts/deploy_app.sh
+var command_to_clone_repo_with_vars = '''
+REPO_NAME="REPO_NAME_VAR" && \
+GIT_REPO_URL="https://github.com/miztiik/$REPO_NAME.git" && \
+cd /var && \
+rm -rf /var/$REPO_NAME && \
+git clone $GIT_REPO_URL && \
+cd /var/$REPO_NAME && \
+chmod +x /var/$REPO_NAME/modules/vm/bootstrap_scripts/deploy_app.sh && \
+bash /var/$REPO_NAME/modules/vm/bootstrap_scripts/deploy_app.sh &
 '''
 
+var command_to_clone_repo = replace(command_to_clone_repo_with_vars, 'REPO_NAME_VAR', repoName)
 
-
-
-
-resource r_deploy_script_on_vm_1 'Microsoft.Compute/virtualMachines/runCommands@2022-03-01' = {
+resource r_deploy_script_1 'Microsoft.Compute/virtualMachines/runCommands@2022-03-01' = {
   parent: r_vm_1
-  name:   '${vmName}_${deploymentParams.global_uniqueness}_script_deployment_1'
+  name:   '${deploymentParams.enterprise_name_suffix}_${deploymentParams.global_uniqueness}_script_1'
   location: deploymentParams.location
   tags: tags
   properties: {
-    asyncExecution: true
+    asyncExecution: false
     source: {
         script: command_to_clone_repo
       }
@@ -41,36 +38,41 @@ resource r_deploy_script_on_vm_1 'Microsoft.Compute/virtualMachines/runCommands@
 }
 
 
-/*
 var script_to_execute_with_vars = '''
-export APP_CONFIG_NAME="APP_CONFIG_VAR_NAME" && \\
+REPO_NAME="REPO_NAME_VAR" && \
+export APP_CONFIG_NAME="APP_CONFIG_VAR_NAME" && \
 python3 /var/$REPO_NAME/app/az_producer_for_cosmos_db.py &
 '''
 
-var script_to_execute = replace(script_to_execute_with_vars, 'APP_CONFIG_VAR_NAME', appConfigName)
+var script_to_execute = replace(replace(script_to_execute_with_vars, 'APP_CONFIG_VAR_NAME', appConfigName),'REPO_NAME_VAR', repoName)
 
-resource r_deploy_script_on_vm_2 'Microsoft.Compute/virtualMachines/runCommands@2022-03-01' = {
+resource r_deploy_script_2 'Microsoft.Compute/virtualMachines/runCommands@2022-03-01' = if (deploy_app_script) {
   parent: r_vm_1
-  name:   '${vmName}_${deploymentParams.global_uniqueness}_script_deployment_2'
+    name:   '${deploymentParams.enterprise_name_suffix}_${deploymentParams.global_uniqueness}_script_2'
   location: deploymentParams.location
   tags: tags
   properties: {
     asyncExecution: true
+    parameters: [
+      {
+        name: 'EVENTS_TO_PRODUCE'
+        value: '1'
+      }
+    ]
     source: {
         script: script_to_execute
       }
   }
   dependsOn: [
-    r_deploy_script_on_vm_1
+    r_deploy_script_1
   ]
 }
-*/
+
 
 // Troublshooting
 /*
 script_location = '/var/lib/waagent/run-command-handler/download/VM_NAME_script_deployment/0/script.sh'
 output_location = '/var/lib/waagent/run-command-handler/download/m-web-srv-004_004_script_deployment/0'
 */
-
 
 

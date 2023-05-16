@@ -5,10 +5,15 @@
     "deploymentParams": {
       "value": {
         "location": "northeurope",
-        "global_uniqueness": "008",
+        "global_uniqueness": "012",
         "enterprise_name": "Miztiik_Enterprises",
-        "enterprise_name_suffix": "azure_vm_to_cosmos_db",
+        "enterprise_name_suffix": "vm_to_cosmos",
         "sub_deploymnet_prefix": "Miztiik_Verse"
+      }
+    },
+    "identityParams": {
+      "value": {
+        "identityNamePrefix": "usr_mgd_identity"
       }
     },
     "vnetParams": {

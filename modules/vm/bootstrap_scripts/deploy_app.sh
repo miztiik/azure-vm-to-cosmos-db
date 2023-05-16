@@ -52,7 +52,6 @@ function clone_git_repo(){
     cd /var
     git clone $GIT_REPO_URL
     cd /var/$REPO_NAME
-    python3 /var/$REPO_NAME/app/azure_vm_to_cosmos_db.py &
 }
 
 function add_env_vars(){

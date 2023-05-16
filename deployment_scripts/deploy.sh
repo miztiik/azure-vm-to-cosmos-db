@@ -20,7 +20,7 @@ ENTERPRISE_NAME_SUFFIX=$(jq -r '.parameters.deploymentParams.value.enterprise_na
 GLOBAL_UNIQUENESS=$(jq -r '.parameters.deploymentParams.value.global_uniqueness' params.json)
 
 RG_NAME="${ENTERPRISE_NAME}_${ENTERPRISE_NAME_SUFFIX}_${GLOBAL_UNIQUENESS}"
-DEPLOYMENT_NAME="${SUB_DEPLOYMENT_PREFIX}-${GLOBAL_UNIQUENESS}-Deployment"
+DEPLOYMENT_NAME="${SUB_DEPLOYMENT_PREFIX}_${ENTERPRISE_NAME_SUFFIX}_${GLOBAL_UNIQUENESS}_Deployment"
 
 # # Generate and SSH key pair to pass the public key as parameter
 # ssh-keygen -m PEM -t rsa -b 4096 -C '' -f ./miztiik.pem
@@ -40,7 +40,7 @@ if [ $? == 0 ]; then
     echo -e "${GREEN}  Resource group created successfully. ${RESET}"
 else
     echo -e "${RED}  Resource group creation failed. ${RESET}"
-    echo -e "${RED}  $RG_CREATION_OUTPUT${RESET}"
+    echo -e "${RED}  $RG_CREATION_OUTPUT ${RESET}"
     exit 1
 fi
 

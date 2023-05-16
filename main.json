@@ -5,11 +5,14 @@
     "_generator": {
       "name": "bicep",
       "version": "0.17.1.54307",
-      "templateHash": "11920111276827063395"
+      "templateHash": "13216682020103904998"
     }
   },
   "parameters": {
     "deploymentParams": {
+      "type": "object"
+    },
+    "identityParams": {
       "type": "object"
     },
     "appConfigParams": {
@@ -52,6 +55,77 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
+      "name": "[format('{0}_{1}_usr_mgd_identity', parameters('deploymentParams').enterprise_name_suffix, parameters('deploymentParams').global_uniqueness)]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "deploymentParams": {
+            "value": "[parameters('deploymentParams')]"
+          },
+          "identityParams": {
+            "value": "[parameters('identityParams')]"
+          },
+          "tags": {
+            "value": "[parameters('tags')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.17.1.54307",
+              "templateHash": "7604186415119991904"
+            }
+          },
+          "parameters": {
+            "deploymentParams": {
+              "type": "object"
+            },
+            "identityParams": {
+              "type": "object"
+            },
+            "tags": {
+              "type": "object"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+              "apiVersion": "2023-01-31",
+              "name": "[format('{0}_{1}_{2}', parameters('identityParams').identityNamePrefix, parameters('deploymentParams').enterprise_name_suffix, parameters('deploymentParams').global_uniqueness)]",
+              "location": "[parameters('deploymentParams').location]",
+              "tags": "[parameters('tags')]"
+            }
+          ],
+          "outputs": {
+            "usr_mgd_identity_id": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}_{1}_{2}', parameters('identityParams').identityNamePrefix, parameters('deploymentParams').enterprise_name_suffix, parameters('deploymentParams').global_uniqueness))]"
+            },
+            "usr_mgd_identity_clientId": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}_{1}_{2}', parameters('identityParams').identityNamePrefix, parameters('deploymentParams').enterprise_name_suffix, parameters('deploymentParams').global_uniqueness)), '2023-01-31').clientId]"
+            },
+            "usr_mgd_identity_principalId": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}_{1}_{2}', parameters('identityParams').identityNamePrefix, parameters('deploymentParams').enterprise_name_suffix, parameters('deploymentParams').global_uniqueness)), '2023-01-31').principalId]"
+            },
+            "usr_mgd_identity_name": {
+              "type": "string",
+              "value": "[format('{0}_{1}_{2}', parameters('identityParams').identityNamePrefix, parameters('deploymentParams').enterprise_name_suffix, parameters('deploymentParams').global_uniqueness)]"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
       "name": "[format('{0}_{1}_Config', parameters('storageAccountParams').storageAccountNamePrefix, parameters('deploymentParams').global_uniqueness)]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -76,7 +150,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.17.1.54307",
-              "templateHash": "10673451371173659036"
+              "templateHash": "1935747476886014878"
             }
           },
           "parameters": {
@@ -87,8 +161,7 @@
               "type": "object"
             },
             "tags": {
-              "type": "object",
-              "defaultValue": "[resourceGroup().tags]"
+              "type": "object"
             },
             "addRandom": {
               "type": "string",
@@ -357,7 +430,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.17.1.54307",
-              "templateHash": "12995854830005814741"
+              "templateHash": "4851374703878523823"
             }
           },
           "parameters": {
@@ -374,8 +447,7 @@
               "type": "string"
             },
             "tags": {
-              "type": "object",
-              "defaultValue": "[resourceGroup().tags]"
+              "type": "object"
             }
           },
           "resources": [
@@ -599,7 +671,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.17.1.54307",
-              "templateHash": "1216507002209864054"
+              "templateHash": "11880034184314036637"
             }
           },
           "parameters": {
@@ -610,8 +682,7 @@
               "type": "object"
             },
             "tags": {
-              "type": "object",
-              "defaultValue": "[resourceGroup().tags]"
+              "type": "object"
             }
           },
           "resources": [
@@ -863,7 +934,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.17.1.54307",
-              "templateHash": "9968861641588105339"
+              "templateHash": "13359124452345549409"
             }
           },
           "parameters": {
@@ -874,8 +945,7 @@
               "type": "object"
             },
             "tags": {
-              "type": "object",
-              "defaultValue": "[resourceGroup().tags]"
+              "type": "object"
             },
             "osKind": {
               "type": "string"
@@ -972,7 +1042,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.17.1.54307",
-              "templateHash": "2467870096733939593"
+              "templateHash": "15376365811874039408"
             }
           },
           "parameters": {
@@ -980,8 +1050,7 @@
               "type": "object"
             },
             "tags": {
-              "type": "object",
-              "defaultValue": "[resourceGroup().tags]"
+              "type": "object"
             },
             "osKind": {
               "type": "string"
@@ -1306,6 +1375,9 @@
           "deploymentParams": {
             "value": "[parameters('deploymentParams')]"
           },
+          "r_usr_mgd_identity_name": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', format('{0}_{1}_usr_mgd_identity', parameters('deploymentParams').enterprise_name_suffix, parameters('deploymentParams').global_uniqueness)), '2022-09-01').outputs.usr_mgd_identity_name.value]"
+          },
           "saName": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', format('{0}_{1}_Sa', parameters('storageAccountParams').storageAccountNamePrefix, parameters('deploymentParams').global_uniqueness)), '2022-09-01').outputs.saName.value]"
           },
@@ -1339,8 +1411,8 @@
           "automationEventsDcrId": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', format('{0}_{1}_Dcr', parameters('logAnalyticsWorkspaceParams').workspaceName, parameters('deploymentParams').global_uniqueness)), '2022-09-01').outputs.automationEventsDcrId.value]"
           },
-          "cosmosDbAccountName": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', format('{0}_{1}_cosmosdb', parameters('cosmosDbParams').cosmosDbNamePrefix, parameters('deploymentParams').global_uniqueness)), '2022-09-01').outputs.cosmosDbAccountName.value]"
+          "cosmos_db_accnt_name": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', format('{0}_{1}_cosmos_db', parameters('cosmosDbParams').cosmosDbNamePrefix, parameters('deploymentParams').global_uniqueness)), '2022-09-01').outputs.cosmos_db_accnt_name.value]"
           },
           "tags": {
             "value": "[parameters('tags')]"
@@ -1353,7 +1425,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.17.1.54307",
-              "templateHash": "18125240709841068330"
+              "templateHash": "2123802990166378349"
             }
           },
           "parameters": {
@@ -1362,6 +1434,9 @@
             },
             "tags": {
               "type": "object"
+            },
+            "r_usr_mgd_identity_name": {
+              "type": "string"
             },
             "saName": {
               "type": "string"
@@ -1408,7 +1483,7 @@
               "type": "string",
               "defaultValue": "[format('{0}-{1}-PublicIp', parameters('vmParams').vmNamePrefix, parameters('deploymentParams').global_uniqueness)]"
             },
-            "cosmosDbAccountName": {
+            "cosmos_db_accnt_name": {
               "type": "string"
             },
             "blobOwnerRoleId": {
@@ -1613,84 +1688,65 @@
               ]
             },
             {
-              "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
-              "apiVersion": "2023-01-31",
-              "name": "[format('{0}_{1}_Identity', parameters('vmName'), parameters('deploymentParams').global_uniqueness)]",
-              "location": "[parameters('deploymentParams').location]",
-              "tags": "[parameters('tags')]"
-            },
-            {
               "type": "Microsoft.Authorization/roleAssignments",
               "apiVersion": "2022-04-01",
               "scope": "[format('Microsoft.Storage/storageAccounts/{0}/blobServices/{1}/containers/{2}', split(format('{0}/default/{1}', parameters('saName'), parameters('blobContainerName')), '/')[0], split(format('{0}/default/{1}', parameters('saName'), parameters('blobContainerName')), '/')[1], split(format('{0}/default/{1}', parameters('saName'), parameters('blobContainerName')), '/')[2])]",
-              "name": "[guid('r_attachBlobOwnerPermsToRole', resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}_{1}_Identity', parameters('vmName'), parameters('deploymentParams').global_uniqueness)), parameters('blobOwnerRoleId'))]",
+              "name": "[guid('r_attachBlobOwnerPermsToRole', resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('r_usr_mgd_identity_name')), parameters('blobOwnerRoleId'))]",
               "properties": {
                 "description": "Blob Owner Permission to ResourceGroup scope",
                 "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', parameters('blobOwnerRoleId'))]",
-                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}_{1}_Identity', parameters('vmName'), parameters('deploymentParams').global_uniqueness)), '2023-01-31').principalId]",
+                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('r_usr_mgd_identity_name')), '2023-01-31').principalId]",
                 "conditionVersion": "2.0",
                 "condition": "[variables('blobPermsConditionStr')]",
                 "principalType": "ServicePrincipal"
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}_{1}_Identity', parameters('vmName'), parameters('deploymentParams').global_uniqueness))]"
-              ]
+              }
             },
             {
               "type": "Microsoft.Authorization/roleAssignments",
               "apiVersion": "2022-04-01",
-              "name": "[guid('r_attachMetricsPublisherPermsToRole', resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}_{1}_Identity', parameters('vmName'), parameters('deploymentParams').global_uniqueness)), parameters('metricsPublisherRoleId'))]",
+              "name": "[guid('r_attachMetricsPublisherPermsToRole', resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('r_usr_mgd_identity_name')), parameters('metricsPublisherRoleId'))]",
               "properties": {
                 "description": "Monitoring Metrics Publisher Permission to ResourceGroup scope",
                 "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', parameters('metricsPublisherRoleId'))]",
-                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}_{1}_Identity', parameters('vmName'), parameters('deploymentParams').global_uniqueness)), '2023-01-31').principalId]",
+                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('r_usr_mgd_identity_name')), '2023-01-31').principalId]",
                 "principalType": "ServicePrincipal"
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}_{1}_Identity', parameters('vmName'), parameters('deploymentParams').global_uniqueness))]"
-              ]
+              }
             },
             {
               "type": "Microsoft.Authorization/roleAssignments",
               "apiVersion": "2022-04-01",
               "scope": "[format('Microsoft.Storage/storageAccounts/{0}/queueServices/{1}/queues/{2}', split(format('{0}/default/{1}', parameters('saName'), parameters('queueName')), '/')[0], split(format('{0}/default/{1}', parameters('saName'), parameters('queueName')), '/')[1], split(format('{0}/default/{1}', parameters('saName'), parameters('queueName')), '/')[2])]",
-              "name": "[guid('r_attachQContributorPermsToRole', resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}_{1}_Identity', parameters('vmName'), parameters('deploymentParams').global_uniqueness)), parameters('qContributorRoleId'))]",
+              "name": "[guid('r_attachQContributorPermsToRole', resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('r_usr_mgd_identity_name')), parameters('qContributorRoleId'))]",
               "properties": {
                 "description": "Queue Contributor Permission to ResourceGroup scope",
                 "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', parameters('qContributorRoleId'))]",
-                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}_{1}_Identity', parameters('vmName'), parameters('deploymentParams').global_uniqueness)), '2023-01-31').principalId]",
+                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('r_usr_mgd_identity_name')), '2023-01-31').principalId]",
                 "conditionVersion": "2.0",
                 "condition": "[variables('qPermsConditionStr')]",
                 "principalType": "ServicePrincipal"
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}_{1}_Identity', parameters('vmName'), parameters('deploymentParams').global_uniqueness))]"
-              ]
+              }
             },
             {
               "type": "Microsoft.Authorization/roleAssignments",
               "apiVersion": "2022-04-01",
               "scope": "[format('Microsoft.AppConfiguration/configurationStores/{0}', parameters('appConfigName'))]",
-              "name": "[guid('r_attachappConfigOwnerPermsToRole', resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}_{1}_Identity', parameters('vmName'), parameters('deploymentParams').global_uniqueness)), parameters('appConfigOwnerRoleId'))]",
+              "name": "[guid('r_attachappConfigOwnerPermsToRole', resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('r_usr_mgd_identity_name')), parameters('appConfigOwnerRoleId'))]",
               "properties": {
                 "description": "App Configuration Owner Permission",
                 "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', parameters('appConfigOwnerRoleId'))]",
-                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}_{1}_Identity', parameters('vmName'), parameters('deploymentParams').global_uniqueness)), '2023-01-31').principalId]",
+                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('r_usr_mgd_identity_name')), '2023-01-31').principalId]",
                 "principalType": "ServicePrincipal"
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}_{1}_Identity', parameters('vmName'), parameters('deploymentParams').global_uniqueness))]"
-              ]
+              }
             },
             {
               "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions",
               "apiVersion": "2023-04-15",
-              "name": "[format('{0}/{1}', parameters('cosmosDbAccountName'), guid('r_cosmodb_customRole', resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}_{1}_Identity', parameters('vmName'), parameters('deploymentParams').global_uniqueness)), resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDbAccountName'))))]",
+              "name": "[format('{0}/{1}', parameters('cosmos_db_accnt_name'), guid('r_cosmodb_customRole', resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('r_usr_mgd_identity_name')), resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmos_db_accnt_name'))))]",
               "properties": {
                 "roleName": "Miztiik Custom Role to read w Cosmos DB1",
                 "type": "CustomRole",
                 "assignableScopes": [
-                  "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDbAccountName'))]"
+                  "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmos_db_accnt_name'))]"
                 ],
                 "permissions": [
                   {
@@ -1705,23 +1761,19 @@
                     ]
                   }
                 ]
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}_{1}_Identity', parameters('vmName'), parameters('deploymentParams').global_uniqueness))]"
-              ]
+              }
             },
             {
               "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments",
               "apiVersion": "2021-04-15",
-              "name": "[format('{0}/{1}', parameters('cosmosDbAccountName'), guid(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}_{1}_Identity', parameters('vmName'), parameters('deploymentParams').global_uniqueness)), resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDbAccountName')), 'r_customRoleAssignmentToUsrIdentity'))]",
+              "name": "[format('{0}/{1}', parameters('cosmos_db_accnt_name'), guid(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('r_usr_mgd_identity_name')), resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmos_db_accnt_name')), 'r_customRoleAssignmentToUsrIdentity'))]",
               "properties": {
-                "roleDefinitionId": "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions', parameters('cosmosDbAccountName'), guid('r_cosmodb_customRole', resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}_{1}_Identity', parameters('vmName'), parameters('deploymentParams').global_uniqueness)), resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDbAccountName'))))]",
-                "scope": "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDbAccountName'))]",
-                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}_{1}_Identity', parameters('vmName'), parameters('deploymentParams').global_uniqueness)), '2023-01-31').principalId]"
+                "roleDefinitionId": "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions', parameters('cosmos_db_accnt_name'), guid('r_cosmodb_customRole', resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('r_usr_mgd_identity_name')), resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmos_db_accnt_name'))))]",
+                "scope": "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmos_db_accnt_name'))]",
+                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('r_usr_mgd_identity_name')), '2023-01-31').principalId]"
               },
               "dependsOn": [
-                "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions', parameters('cosmosDbAccountName'), guid('r_cosmodb_customRole', resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}_{1}_Identity', parameters('vmName'), parameters('deploymentParams').global_uniqueness)), resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDbAccountName'))))]",
-                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}_{1}_Identity', parameters('vmName'), parameters('deploymentParams').global_uniqueness))]"
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions', parameters('cosmos_db_accnt_name'), guid('r_cosmodb_customRole', resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('r_usr_mgd_identity_name')), resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmos_db_accnt_name'))))]"
               ]
             },
             {
@@ -1733,7 +1785,7 @@
               "identity": {
                 "type": "UserAssigned",
                 "userAssignedIdentities": {
-                  "[format('{0}', resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}_{1}_Identity', parameters('vmName'), parameters('deploymentParams').global_uniqueness)))]": {}
+                  "[format('{0}', resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('r_usr_mgd_identity_name')))]": {}
                 }
               },
               "properties": {
@@ -1789,8 +1841,7 @@
                 "userData": "[variables('userDataScript')]"
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-Nic-01', parameters('vmName')))]",
-                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}_{1}_Identity', parameters('vmName'), parameters('deploymentParams').global_uniqueness))]"
+                "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-Nic-01', parameters('vmName')))]"
               ]
             },
             {
@@ -1807,11 +1858,10 @@
                 "typeHandlerVersion": "1.25",
                 "settings": {
                   "identifier-name": "mi_res_id",
-                  "identifier-value": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}_{1}_Identity', parameters('vmName'), parameters('deploymentParams').global_uniqueness))]"
+                  "identifier-value": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('r_usr_mgd_identity_name'))]"
                 }
               },
               "dependsOn": [
-                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}_{1}_Identity', parameters('vmName'), parameters('deploymentParams').global_uniqueness))]",
                 "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]"
               ]
             },
@@ -1899,7 +1949,7 @@
             },
             "userManagedIdentityId": {
               "type": "string",
-              "value": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}_{1}_Identity', parameters('vmName'), parameters('deploymentParams').global_uniqueness))]"
+              "value": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('r_usr_mgd_identity_name'))]"
             },
             "qPermsConditionStr": {
               "type": "string",
@@ -1911,19 +1961,20 @@
       "dependsOn": [
         "[resourceId('Microsoft.Resources/deployments', format('{0}_{1}_Config', parameters('storageAccountParams').storageAccountNamePrefix, parameters('deploymentParams').global_uniqueness))]",
         "[resourceId('Microsoft.Resources/deployments', format('{0}_{1}_Blob', parameters('storageAccountParams').storageAccountNamePrefix, parameters('deploymentParams').global_uniqueness))]",
-        "[resourceId('Microsoft.Resources/deployments', format('{0}_{1}_cosmosdb', parameters('cosmosDbParams').cosmosDbNamePrefix, parameters('deploymentParams').global_uniqueness))]",
+        "[resourceId('Microsoft.Resources/deployments', format('{0}_{1}_cosmos_db', parameters('cosmosDbParams').cosmosDbNamePrefix, parameters('deploymentParams').global_uniqueness))]",
         "[resourceId('Microsoft.Resources/deployments', format('{0}_{1}_Dce', parameters('dceParams').endpointNamePrefix, parameters('deploymentParams').global_uniqueness))]",
         "[resourceId('Microsoft.Resources/deployments', format('{0}_{1}_Dcr', parameters('logAnalyticsWorkspaceParams').workspaceName, parameters('deploymentParams').global_uniqueness))]",
         "[resourceId('Microsoft.Resources/deployments', format('{0}_{1}_La', parameters('logAnalyticsWorkspaceParams').workspaceName, parameters('deploymentParams').global_uniqueness))]",
         "[resourceId('Microsoft.Resources/deployments', format('{0}_{1}_Sa', parameters('storageAccountParams').storageAccountNamePrefix, parameters('deploymentParams').global_uniqueness))]",
         "[resourceId('Microsoft.Resources/deployments', format('{0}_{1}_Sq', parameters('storageAccountParams').storageAccountNamePrefix, parameters('deploymentParams').global_uniqueness))]",
+        "[resourceId('Microsoft.Resources/deployments', format('{0}_{1}_usr_mgd_identity', parameters('deploymentParams').enterprise_name_suffix, parameters('deploymentParams').global_uniqueness))]",
         "[resourceId('Microsoft.Resources/deployments', format('{0}_{1}_Vnet', parameters('vnetParams').vnetNamePrefix, parameters('deploymentParams').global_uniqueness))]"
       ]
     },
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
-      "name": "[format('{0}_{1}_cosmosdb', parameters('cosmosDbParams').cosmosDbNamePrefix, parameters('deploymentParams').global_uniqueness)]",
+      "name": "[format('{0}_{1}_cosmos_db', parameters('cosmosDbParams').cosmosDbNamePrefix, parameters('deploymentParams').global_uniqueness)]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -1950,7 +2001,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.17.1.54307",
-              "templateHash": "3172607694158112293"
+              "templateHash": "8183313078277957580"
             }
           },
           "parameters": {
@@ -1968,6 +2019,7 @@
             }
           },
           "variables": {
+            "cosmos_db_accnt_name": "[replace(format('{0}-db-account-{1}', parameters('deploymentParams').enterprise_name_suffix, parameters('deploymentParams').global_uniqueness), '_', '-')]",
             "databaseName": "[format('{0}-db-{1}', parameters('cosmosDbParams').cosmosDbNamePrefix, parameters('deploymentParams').global_uniqueness)]",
             "containerName": "[format('{0}-container-{1}', parameters('cosmosDbParams').cosmosDbNamePrefix, parameters('deploymentParams').global_uniqueness)]"
           },
@@ -1975,7 +2027,7 @@
             {
               "type": "Microsoft.DocumentDB/databaseAccounts",
               "apiVersion": "2022-08-15",
-              "name": "[format('{0}-db-account-{1}', parameters('cosmosDbParams').cosmosDbNamePrefix, parameters('deploymentParams').global_uniqueness)]",
+              "name": "[variables('cosmos_db_accnt_name')]",
               "location": "[parameters('deploymentParams').location]",
               "kind": "GlobalDocumentDB",
               "tags": "[parameters('tags')]",
@@ -2005,20 +2057,20 @@
             {
               "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases",
               "apiVersion": "2021-06-15",
-              "name": "[format('{0}/{1}', format('{0}-db-account-{1}', parameters('cosmosDbParams').cosmosDbNamePrefix, parameters('deploymentParams').global_uniqueness), variables('databaseName'))]",
+              "name": "[format('{0}/{1}', variables('cosmos_db_accnt_name'), variables('databaseName'))]",
               "properties": {
                 "resource": {
                   "id": "[variables('databaseName')]"
                 }
               },
               "dependsOn": [
-                "[resourceId('Microsoft.DocumentDB/databaseAccounts', format('{0}-db-account-{1}', parameters('cosmosDbParams').cosmosDbNamePrefix, parameters('deploymentParams').global_uniqueness))]"
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('cosmos_db_accnt_name'))]"
               ]
             },
             {
               "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
               "apiVersion": "2022-08-15",
-              "name": "[format('{0}/{1}/{2}', format('{0}-db-account-{1}', parameters('cosmosDbParams').cosmosDbNamePrefix, parameters('deploymentParams').global_uniqueness), variables('databaseName'), variables('containerName'))]",
+              "name": "[format('{0}/{1}/{2}', variables('cosmos_db_accnt_name'), variables('databaseName'), variables('containerName'))]",
               "properties": {
                 "resource": {
                   "id": "[variables('containerName')]",
@@ -2048,7 +2100,7 @@
                 }
               },
               "dependsOn": [
-                "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', format('{0}-db-account-{1}', parameters('cosmosDbParams').cosmosDbNamePrefix, parameters('deploymentParams').global_uniqueness), variables('databaseName'))]"
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('cosmos_db_accnt_name'), variables('databaseName'))]"
               ]
             },
             {
@@ -2056,12 +2108,12 @@
               "apiVersion": "2023-03-01",
               "name": "[format('{0}/{1}', parameters('appConfigName'), 'COSMOS_DB_ACCOUNT')]",
               "properties": {
-                "value": "[format('{0}-db-account-{1}', parameters('cosmosDbParams').cosmosDbNamePrefix, parameters('deploymentParams').global_uniqueness)]",
+                "value": "[variables('cosmos_db_accnt_name')]",
                 "contentType": "text/plain",
                 "tags": "[parameters('tags')]"
               },
               "dependsOn": [
-                "[resourceId('Microsoft.DocumentDB/databaseAccounts', format('{0}-db-account-{1}', parameters('cosmosDbParams').cosmosDbNamePrefix, parameters('deploymentParams').global_uniqueness))]"
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('cosmos_db_accnt_name'))]"
               ]
             },
             {
@@ -2074,7 +2126,7 @@
                 "tags": "[parameters('tags')]"
               },
               "dependsOn": [
-                "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', format('{0}-db-account-{1}', parameters('cosmosDbParams').cosmosDbNamePrefix, parameters('deploymentParams').global_uniqueness), variables('databaseName'))]"
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('cosmos_db_accnt_name'), variables('databaseName'))]"
               ]
             },
             {
@@ -2087,20 +2139,20 @@
                 "tags": "[parameters('tags')]"
               },
               "dependsOn": [
-                "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers', format('{0}-db-account-{1}', parameters('cosmosDbParams').cosmosDbNamePrefix, parameters('deploymentParams').global_uniqueness), variables('databaseName'), variables('containerName'))]"
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers', variables('cosmos_db_accnt_name'), variables('databaseName'), variables('containerName'))]"
               ]
             }
           ],
           "outputs": {
-            "cosmosDbAccountName": {
+            "cosmos_db_accnt_name": {
               "type": "string",
-              "value": "[format('{0}-db-account-{1}', parameters('cosmosDbParams').cosmosDbNamePrefix, parameters('deploymentParams').global_uniqueness)]"
+              "value": "[variables('cosmos_db_accnt_name')]"
             },
-            "cosmosDbName": {
+            "cosmos_db_name": {
               "type": "string",
               "value": "[variables('databaseName')]"
             },
-            "cosmosDbContainerName": {
+            "cosmos_db_container_name": {
               "type": "string",
               "value": "[variables('containerName')]"
             }
@@ -2109,6 +2161,105 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.Resources/deployments', format('{0}_{1}_Config', parameters('storageAccountParams').storageAccountNamePrefix, parameters('deploymentParams').global_uniqueness))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "[format('{0}_add_delay', parameters('deploymentParams').global_uniqueness)]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "deploymentParams": {
+            "value": "[parameters('deploymentParams')]"
+          },
+          "r_usr_mgd_identity_id": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', format('{0}_{1}_usr_mgd_identity', parameters('deploymentParams').enterprise_name_suffix, parameters('deploymentParams').global_uniqueness)), '2022-09-01').outputs.usr_mgd_identity_id.value]"
+          },
+          "delayInSeconds": {
+            "value": 60
+          },
+          "delay_multiple": {
+            "value": 1
+          },
+          "tags": {
+            "value": "[parameters('tags')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.17.1.54307",
+              "templateHash": "17527130762761328267"
+            }
+          },
+          "parameters": {
+            "deploymentParams": {
+              "type": "object"
+            },
+            "tags": {
+              "type": "object"
+            },
+            "r_usr_mgd_identity_id": {
+              "type": "string"
+            },
+            "delayInSeconds": {
+              "type": "int",
+              "defaultValue": 45
+            },
+            "delay_multiple": {
+              "type": "int",
+              "defaultValue": 1
+            },
+            "baseTime": {
+              "type": "string",
+              "defaultValue": "[utcNow('yyyy-MM-dd-HH-mm-ss')]"
+            }
+          },
+          "resources": [
+            {
+              "copy": {
+                "name": "r_sleep_delay",
+                "count": "[length(range(0, parameters('delay_multiple')))]"
+              },
+              "type": "Microsoft.Resources/deploymentScripts",
+              "apiVersion": "2020-10-01",
+              "name": "[format('add_deployment_delay_{0}_{1}', range(0, parameters('delay_multiple'))[copyIndex()], parameters('deploymentParams').global_uniqueness)]",
+              "location": "[parameters('deploymentParams').location]",
+              "tags": "[parameters('tags')]",
+              "kind": "AzureCLI",
+              "identity": {
+                "type": "UserAssigned",
+                "userAssignedIdentities": {
+                  "[format('{0}', parameters('r_usr_mgd_identity_id'))]": {}
+                }
+              },
+              "properties": {
+                "azCliVersion": "2.30.0",
+                "timeout": "PT15M",
+                "retentionInterval": "PT1H",
+                "forceUpdateTag": "[parameters('baseTime')]",
+                "environmentVariables": [
+                  {
+                    "name": "INITIAL_DELAY",
+                    "value": "[format('{0}s', parameters('delayInSeconds'))]"
+                  }
+                ],
+                "scriptContent": "      #!/bin/bash\r\n      set -e\r\n\r\n      echo -e \\\"Sleeping for ${INITIAL_DELAY} seconds\\\"\r\n      sleep ${INITIAL_DELAY}\r\n    "
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', format('{0}_{1}_cosmos_db', parameters('cosmosDbParams').cosmosDbNamePrefix, parameters('deploymentParams').global_uniqueness))]",
+        "[resourceId('Microsoft.Resources/deployments', format('{0}_{1}_usr_mgd_identity', parameters('deploymentParams').enterprise_name_suffix, parameters('deploymentParams').global_uniqueness))]"
       ]
     },
     {
@@ -2131,7 +2282,10 @@
             "value": "[reference(resourceId('Microsoft.Resources/deployments', format('{0}_{1}_Config', parameters('storageAccountParams').storageAccountNamePrefix, parameters('deploymentParams').global_uniqueness)), '2022-09-01').outputs.appConfigName.value]"
           },
           "repoName": {
-            "value": "azure-vm-to-cosmos-db"
+            "value": "[parameters('brandTags').project]"
+          },
+          "deploy_app_script": {
+            "value": true
           },
           "tags": {
             "value": "[parameters('tags')]"
@@ -2144,7 +2298,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.17.1.54307",
-              "templateHash": "10799675959931780067"
+              "templateHash": "5956850353096271046"
             }
           },
           "parameters": {
@@ -2155,32 +2309,61 @@
               "type": "object"
             },
             "appConfigName": {
-              "type": "securestring"
+              "type": "string"
             },
             "repoName": {
               "type": "string"
             },
             "tags": {
               "type": "object"
+            },
+            "deploy_app_script": {
+              "type": "bool",
+              "defaultValue": false
             }
           },
           "variables": {
-            "script_to_execute_with_vars": "REPO_NAME=\"REPO_VAR_NAME\" && \\\\\nGIT_REPO_URL=\"https://github.com/miztiik/$REPO_NAME.git\" && \\\\\ncd /var && \\\\\nrm -rf /var/$REPO_NAME && \\\\\ngit clone $GIT_REPO_URL && \\\\\ncd /var/$REPO_NAME && \\\\\nchmod +x /var/$REPO_NAME/modules/vm/bootstrap_scripts/deploy_app.sh\n./var/$REPO_NAME/modules/vm/bootstrap_scripts/deploy_app.sh\nexport APP_CONFIG_NAME=\"APP_CONFIG_VAR_NAME\" && \\\\\npython3 /var/$REPO_NAME/app/az_producer_for_cosmos_db.py &\n",
-            "script_to_execute": "[replace(replace(variables('script_to_execute_with_vars'), 'APP_CONFIG_VAR_NAME', parameters('appConfigName')), 'REPO_VAR_NAME', parameters('repoName'))]"
+            "command_to_clone_repo_with_vars": "REPO_NAME=\"REPO_NAME_VAR\" && \\\r\nGIT_REPO_URL=\"https://github.com/miztiik/$REPO_NAME.git\" && \\\r\ncd /var && \\\r\nrm -rf /var/$REPO_NAME && \\\r\ngit clone $GIT_REPO_URL && \\\r\ncd /var/$REPO_NAME && \\\r\nchmod +x /var/$REPO_NAME/modules/vm/bootstrap_scripts/deploy_app.sh && \\\r\n./var/$REPO_NAME/modules/vm/bootstrap_scripts/deploy_app.sh &\r\n",
+            "command_to_clone_repo": "[replace(variables('command_to_clone_repo_with_vars'), 'REPO_NAME_VAR', parameters('repoName'))]",
+            "script_to_execute_with_vars": "REPO_NAME=\"REPO_NAME_VAR\" && \\\r\nexport APP_CONFIG_NAME=\"APP_CONFIG_VAR_NAME\" && \\\r\npython3 /var/$REPO_NAME/app/az_producer_for_cosmos_db.py &\r\n",
+            "script_to_execute": "[replace(replace(variables('script_to_execute_with_vars'), 'APP_CONFIG_VAR_NAME', parameters('appConfigName')), 'REPO_NAME_VAR', parameters('repoName'))]"
           },
           "resources": [
             {
               "type": "Microsoft.Compute/virtualMachines/runCommands",
               "apiVersion": "2022-03-01",
-              "name": "[format('{0}/{1}', parameters('vmName'), format('{0}_{1}_script_deployment', parameters('vmName'), parameters('deploymentParams').global_uniqueness))]",
+              "name": "[format('{0}/{1}', parameters('vmName'), format('{0}_{1}_script_1', parameters('deploymentParams').enterprise_name_suffix, parameters('deploymentParams').global_uniqueness))]",
               "location": "[parameters('deploymentParams').location]",
               "tags": "[parameters('tags')]",
               "properties": {
                 "asyncExecution": true,
                 "source": {
-                  "script": "[variables('script_to_execute')]"
+                  "script": "[variables('command_to_clone_repo')]"
                 }
               }
+            },
+            {
+              "condition": "[parameters('deploy_app_script')]",
+              "type": "Microsoft.Compute/virtualMachines/runCommands",
+              "apiVersion": "2022-03-01",
+              "name": "[format('{0}/{1}', parameters('vmName'), format('{0}_{1}_script_2', parameters('deploymentParams').enterprise_name_suffix, parameters('deploymentParams').global_uniqueness))]",
+              "location": "[parameters('deploymentParams').location]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "asyncExecution": true,
+                "parameters": [
+                  {
+                    "name": "EVENTS_TO_PRODUCE",
+                    "value": "1"
+                  }
+                ],
+                "source": {
+                  "script": "[variables('script_to_execute')]"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines/runCommands', parameters('vmName'), format('{0}_{1}_script_1', parameters('deploymentParams').enterprise_name_suffix, parameters('deploymentParams').global_uniqueness))]"
+              ]
             }
           ]
         }
