@@ -11,13 +11,13 @@ resource r_vm_1 'Microsoft.Compute/virtualMachines@2022-03-01' existing = {
 }
 
 var command_to_clone_repo_with_vars = '''
-REPO_NAME="REPO_NAME_VAR" &&\\
-GIT_REPO_URL="https://github.com/miztiik/$REPO_NAME.git" &&\\
+REPO_NAME="REPO_NAME_VAR" &&\
+GIT_REPO_URL="https://github.com/miztiik/$REPO_NAME.git" &&\
 cd /var && \
-rm -rf /var/$REPO_NAME &&\\
-git clone $GIT_REPO_URL &&\\
-cd /var/$REPO_NAME &&\\
-chmod +x /var/$REPO_NAME/modules/vm/bootstrap_scripts/deploy_app.sh &&\\
+rm -rf /var/$REPO_NAME &&\
+git clone $GIT_REPO_URL &&\
+cd /var/$REPO_NAME &&\
+chmod +x /var/$REPO_NAME/modules/vm/bootstrap_scripts/deploy_app.sh &&\
 bash /var/$REPO_NAME/modules/vm/bootstrap_scripts/deploy_app.sh &
 '''
 
@@ -39,9 +39,17 @@ resource r_deploy_script_1 'Microsoft.Compute/virtualMachines/runCommands@2022-0
 
 
 var script_to_execute_with_vars = '''
-REPO_NAME="REPO_NAME_VAR" && \
-export APP_CONFIG_NAME="APP_CONFIG_VAR_NAME" && \
-python3 /var/$REPO_NAME/app/az_producer_for_cosmos_db.py &
+LOG_FILE="/var/log/miztiik-store-events-producer-$(date +'%Y-%m-%d').log" &&\
+REPO_NAME="REPO_NAME_VAR" &&\
+export APP_CONFIG_NAME="APP_CONFIG_VAR_NAME" &&\
+echo "pwd: $(pwd)" >> $LOG_FILE &&\
+echo "whoami: $(whoami)" >> $LOG_FILE &&\
+echo "which: $(which python3)" >> $LOG_FILE &&\
+echo "USER: ${USER}" >> $LOG_FILE &&\
+echo "PATH: ${PATH}" >> $LOG_FILE &&\
+echo "EVENTS_TO_PRODUCE: $1" >> $LOG_FILE &&\
+echo "pip3 show azure.identity: $(pip3 show azure.identity)" >> $LOG_FILE &&\
+/usr/bin/python3 /var/$REPO_NAME/app/az_producer_for_cosmos_db.py >> $LOG_FILE &
 '''
 
 var script_to_execute = replace(replace(script_to_execute_with_vars, 'APP_CONFIG_VAR_NAME', appConfigName),'REPO_NAME_VAR', repoName)

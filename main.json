@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.17.1.54307",
-      "templateHash": "3568274365197346754"
+      "templateHash": "952087829839763036"
     }
   },
   "parameters": {
@@ -2166,7 +2166,7 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
-      "name": "[format('{0}_add_delay', parameters('deploymentParams').global_uniqueness)]",
+      "name": "[format('deployment_delay_{0}', parameters('deploymentParams').global_uniqueness)]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -2298,7 +2298,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.17.1.54307",
-              "templateHash": "8081075157279176829"
+              "templateHash": "8302045756091302096"
             }
           },
           "parameters": {
@@ -2323,9 +2323,9 @@
             }
           },
           "variables": {
-            "command_to_clone_repo_with_vars": "REPO_NAME=\"REPO_NAME_VAR\" && \\\nGIT_REPO_URL=\"https://github.com/miztiik/$REPO_NAME.git\" && \\\ncd /var && \\\nrm -rf /var/$REPO_NAME && \\\ngit clone $GIT_REPO_URL && \\\ncd /var/$REPO_NAME && \\\nchmod +x /var/$REPO_NAME/modules/vm/bootstrap_scripts/deploy_app.sh && \\\nbash /var/$REPO_NAME/modules/vm/bootstrap_scripts/deploy_app.sh &\n",
+            "command_to_clone_repo_with_vars": "REPO_NAME=\"REPO_NAME_VAR\" &&\\\\\nGIT_REPO_URL=\"https://github.com/miztiik/$REPO_NAME.git\" &&\\\\\ncd /var && \\\nrm -rf /var/$REPO_NAME &&\\\\\ngit clone $GIT_REPO_URL &&\\\\\ncd /var/$REPO_NAME &&\\\\\nchmod +x /var/$REPO_NAME/modules/vm/bootstrap_scripts/deploy_app.sh &&\\\\\nbash /var/$REPO_NAME/modules/vm/bootstrap_scripts/deploy_app.sh &\n",
             "command_to_clone_repo": "[replace(variables('command_to_clone_repo_with_vars'), 'REPO_NAME_VAR', parameters('repoName'))]",
-            "script_to_execute_with_vars": "REPO_NAME=\"REPO_NAME_VAR\" && \\\nexport APP_CONFIG_NAME=\"APP_CONFIG_VAR_NAME\" && \\\npython3 /var/$REPO_NAME/app/az_producer_for_cosmos_db.py &\n",
+            "script_to_execute_with_vars": "LOG_FILE=\"/var/log/miztiik-store-events-producer-$(date +'%Y-%m-%d').log\" &&\\\\\nREPO_NAME=\"REPO_NAME_VAR\" &&\\\\\nexport APP_CONFIG_NAME=\"APP_CONFIG_VAR_NAME\" &&\\\\\n\necho \"pwd: $(pwd)\" >> $LOG_FILE &&\\\\\necho \"whoami: $(whoami)\" >> $LOG_FILE &&\\\\\necho \"which: $(which python3)\" >> $LOG_FILE &&\\\\\necho \"USER: ${USER}\" >> $LOG_FILE &&\\\\\necho \"PATH: ${PATH}\" >> $LOG_FILE &&\\\\\necho \"EVENTS_TO_PRODUCE: ${EVENTS_TO_PRODUCE}\" >> $LOG_FILE &&\\\\\npython3 /var/$REPO_NAME/app/az_producer_for_cosmos_db.py >> $LOG_FILE &\n",
             "script_to_execute": "[replace(replace(variables('script_to_execute_with_vars'), 'APP_CONFIG_VAR_NAME', parameters('appConfigName')), 'REPO_NAME_VAR', parameters('repoName'))]"
           },
           "resources": [

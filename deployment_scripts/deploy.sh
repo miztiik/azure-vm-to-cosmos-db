@@ -33,14 +33,15 @@ DEPLOYMENT_OUTPUT_1=""
 function deploy_everything()
 {
 
-echo -e " Creating Resource Group: ${CYAN}${RG_NAME}${RESET} at ${CYAN}${LOCATION}${RESET}"
+echo -e "${YELLOW} Create Resource Group ${RESET}" # Yellow
+echo -e "  Initiate RG Deployment: ${CYAN}${RG_NAME}${RESET} at ${CYAN}${LOCATION}${RESET}"
 RG_CREATION_OUTPUT=$(az group create -n $RG_NAME --location $LOCATION  | jq -r '.name')
 
 if [ $? == 0 ]; then
-    echo -e "${GREEN}  Resource group created successfully. ${RESET}"
+    echo -e "${GREEN}   Resource group created successfully. ${RESET}"
 else
-    echo -e "${RED}  Resource group creation failed. ${RESET}"
-    echo -e "${RED}  $RG_CREATION_OUTPUT ${RESET}"
+    echo -e "${RED}   Resource group creation failed. ${RESET}"
+    echo -e "${RED}   $RG_CREATION_OUTPUT ${RESET}"
     exit 1
 fi
 
@@ -48,7 +49,7 @@ fi
 az bicep build --file $1
 
 # Initiate Deployments
-echo -e "${YELLOW} Initiating Deployments ${RESET}" # Yellow
+echo -e "${YELLOW} Initiate Deployments in RG ${RESET}" # Yellow
 echo -e "  Deploy: ${CYAN}${DEPLOYMENT_NAME}${RESET} at ${CYAN}${LOCATION}${RESET}"
 
 az deployment group create \

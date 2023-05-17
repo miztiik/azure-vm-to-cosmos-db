@@ -76,7 +76,7 @@ function install_libs_on_ubuntu(){
   sudo apt-get -y install python3-pip
   # sudo apt-get -y python3 -m pip install --upgrade pip
   
-  log_this "End  jq, git, python3-pip Installation"
+  log_this "End of jq, git, python3-pip Installation"
 }
 
 function install_azure_python_sdk(){
@@ -109,8 +109,14 @@ function install_nodejs(){
 function check_execution(){
   HOST_FQDN=$(hostname)
   HOST_IP=$(hostname -I)
-  log_this "Begin Miztiik Customisation of Host: ${HOST_FQDN} - ${HOST_IP}"
-  log_this "hello" >>/var/log/miztiik.log
+  CURR_PWD=$(pwd)
+  CURR_USER=$(whoami)
+  CURR_PATH=$(echo $PATH)
+  log_this "Miztiik Customisation of Host: ${HOST_FQDN} - ${HOST_IP}"
+  # log_this "hello" >>/var/log/miztiik.log
+  log_this "Current User: ${CURR_USER}"
+  log_this "Current PWD: ${CURR_PWD}"
+  log_this "Current PATH: ${CURR_PATH}"
 }
 
 check_execution                 |   tee -a "${LOG_FILE}"
