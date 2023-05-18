@@ -51,6 +51,11 @@ echo "EVENTS_TO_PRODUCE: $1" >> $LOG_FILE &&\
 echo "EVENTS_TO_PRODUCE_AS_ENV_VAR: $EVENTS_TO_PRODUCE" >> $LOG_FILE &&\
 echo "which pip : $(which pip)" >> $LOG_FILE &&\
 echo "which pip3 : $(which pip3)" >> $LOG_FILE &&\
+python3 -m pip install --no-cache-dir --upgrade install azure-identity &&\
+python3 -m pip install --no-cache-dir --upgrade install azure-storage-blob &&\
+python3 -m pip install --no-cache-dir --upgrade install azure-storage-queue &&\
+python3 -m pip install --no-cache-dir --upgrade install azure-appconfiguration-provider &&\
+python3 -m pip install --no-cache-dir --upgrade install azure-cosmos &&\
 echo "pip version: $(/usr/bin/pip3 --version)" >> $LOG_FILE &&\
 echo "/usr/bin/pip3 show azure.identity: $(/usr/bin/pip3 show azure.identity)" >> $LOG_FILE &&\
 /usr/bin/python3 /var/$REPO_NAME/app/az_producer_for_cosmos_db.py >> $LOG_FILE &
